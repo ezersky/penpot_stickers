@@ -5,7 +5,6 @@ if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
   penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
 } else {
   console.warn("[Sticker Generator] penpot.ui.open is not available");
-  // Просто завершаем, без return
 }
 
 // Универсальный обработчик сообщений
@@ -16,23 +15,42 @@ const handleMessage = async (message) => {
   const color = message.color || "#ffffff";
 
   // 1. Создаем текстовый шейп
-  if (typeof penpot.createText !== "function") {
-    console.error("[Sticker Generator] penpot.createText is not available");
+  // В Penpot 2.17 createText требует параметры
+  let textShape;
+  try {
+    // Пробуем вариант с объектом параметров
+    textShape = penpot.createText({
+      text: text,
+      fontFamily: "Inter",
+      fontSize: 15
+    });
+  } catch (e1) {
+    try {
+      // Пробуем вариант с позиционными аргументами
+      textShape = penpot.createText(text, "Inter", 15);
+    } catch (e2) {
+      console.error("[Sticker Generator] createText failed:", e1, e2);
+      return;
+    }
+  }
+
+  if (!textShape) {
+    console.error("[Sticker Generator] createText returned null/undefined");
     return;
   }
 
-  const textShape = penpot.createText();
-  if (!textShape) return;
-
   textShape.name = "Sticker Text";
 
-  // Пробуем несколько вариантов имени свойства для текста
-  if ("characters" in textShape) {
-    textShape.characters = text;
-  } else if ("text" in textShape) {
-    textShape.text = text;
-  } else if ("content" in textShape) {
-    textShape.content = text;
+  // Если текст не установился через createText, пробуем задать отдельно
+  if (!textShape.characters && !textShape.text && !textShape.content) {
+    // Пробуем разные варианты
+    if ("characters" in textShape) {
+      textShape.characters = text;
+    } else if ("text" in textShape) {
+      textShape.text = text;
+    } else if ("content" in textShape) {
+      textShape.content = text;
+    }
   }
 
   textShape.fontFamily = "Inter";
@@ -64,16 +82,29 @@ const handleMessage = async (message) => {
   const rectHeight = textHeight + paddingY * 2;
 
   // 2. Создаем прямоугольную подложку
-  if (typeof penpot.createRectangle !== "function") {
-    console.error("[Sticker Generator] penpot.createRectangle is not available");
+  let rect;
+  try {
+    rect = penpot.createRectangle({
+      width: rectWidth,
+      height: rectHeight
+    });
+  } catch (e1) {
+    try {
+      rect = penpot.createRectangle(rectWidth, rectHeight);
+    } catch (e2) {
+      rect = penpot.createRectangle();
+      if (rect) {
+        rect.resize(rectWidth, rectHeight);
+      }
+    }
+  }
+
+  if (!rect) {
+    console.error("[Sticker Generator] createRectangle failed");
     return;
   }
 
-  const rect = penpot.createRectangle();
-  if (!rect) return;
-
   rect.name = "Sticker Base";
-  rect.resize(rectWidth, rectHeight);
   rect.borderRadius = 8;
 
   rect.fills = [{
@@ -97,13 +128,18 @@ const handleMessage = async (message) => {
   textShape.y = paddingY;
 
   // 3. Группируем элементы
-  if (typeof penpot.createGroup !== "function") {
-    console.error("[Sticker Generator] penpot.createGroup is not available");
+  let group;
+  try {
+    group = penpot.createGroup([rect, textShape]);
+  } catch (e) {
+    console.error("[Sticker Generator] createGroup failed:", e);
     return;
   }
 
-  const group = penpot.createGroup([rect, textShape]);
-  if (!group) return;
+  if (!group) {
+    console.error("[Sticker Generator] createGroup returned null/undefined");
+    return;
+  }
 
   group.name = `Sticker: ${text.slice(0, 12)}${text.length > 12 ? "..." : ""}`;
 
@@ -129,7 +165,6 @@ const handleMessage = async (message) => {
 };
 
 // Подписка на сообщения от UI через penpot.ui.onMessage
-// В Penpot 2.17 это правильный способ
 if (penpot.ui && typeof penpot.ui.onMessage === "function") {
   penpot.ui.onMessage(handleMessage);
 } else {
