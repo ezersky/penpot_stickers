@@ -5,7 +5,7 @@ if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
   penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
 } else {
   console.warn("[Sticker Generator] penpot.ui.open is not available");
-  return;
+  // Просто завершаем, без return
 }
 
 // Универсальный обработчик сообщений
