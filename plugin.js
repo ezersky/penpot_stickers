@@ -165,19 +165,23 @@ const handleMessage = async (message) => {
     console.error("[Sticker Generator] shapesColors failed:", e);
   }
   
-  // Пробуем изменить существующий fills
+  // Пробуем заменить fills[0] на новый объект
   console.log("[Sticker Generator] rect.fills before:", rect.fills);
-  console.log("[Sticker Generator] rect.fills[0]:", rect.fills[0]);
   try {
     const rgb = hexToRgb(color);
-    rect.fills[0].color = rgb;
-    console.log("[Sticker Generator] rect.fills[0].color set to:", rgb);
+    const newFill = {
+      type: "solid",
+      color: rgb,
+      opacity: 1
+    };
+    rect.fills[0] = newFill;
+    console.log("[Sticker Generator] rect.fills[0] replaced with:", newFill);
     console.log("[Sticker Generator] rect.fills after:", rect.fills);
-    console.log("[Sticker Generator] fills modified successfully");
+    console.log("[Sticker Generator] fills replaced successfully");
   } catch (e) {
-    console.error("[Sticker Generator] rect.fills modification failed:", e);
+    console.error("[Sticker Generator] rect.fills replacement failed:", e);
   }
-  
+    
   // Выделяем созданную группу
   if (penpot.selection !== undefined) {
     penpot.selection = [group];
