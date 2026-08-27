@@ -156,21 +156,29 @@ const handleMessage = async (message) => {
   group.x = viewportCenterX - rectWidth / 2;
   group.y = viewportCenterY - rectHeight / 2;
 
-  // 4. Устанавливаем цвет прямоугольника через penpot.shapesColors
+  // 4. Устанавливаем цвет прямоугольника
   console.log("[Sticker Generator] calling shapesColors with rect:", rect, "color:", color);
   try {
-    // Выделяем прямоугольник временно
-    penpot.selection = [rect];
     penpot.shapesColors([rect], color);
     console.log("[Sticker Generator] shapesColors success");
-    // Возвращаем выделение на группу
-    penpot.selection = [group];
   } catch (e) {
     console.error("[Sticker Generator] shapesColors failed:", e);
   }
-  console.log("[Sticker Generator] rect.fillColor:", rect.fillColor);
-  console.log("[Sticker Generator] rect.style:", rect.style);
-  console.log("[Sticker Generator] rect.fills:", rect.fills);
+  
+  // Пробуем установить fills напрямую
+  console.log("[Sticker Generator] rect.fills before:", rect.fills);
+  try {
+    const rgb = hexToRgb(color);
+    rect.fills = [{
+      type: "solid",
+      color: rgb,
+      opacity: 1
+    }];
+    console.log("[Sticker Generator] rect.fills after:", rect.fills);
+    console.log("[Sticker Generator] fills set successfully");
+  } catch (e) {
+    console.error("[Sticker Generator] rect.fills failed:", e);
+  }
   
   // Выделяем созданную группу
   if (penpot.selection !== undefined) {
