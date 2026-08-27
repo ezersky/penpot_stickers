@@ -165,21 +165,22 @@ const handleMessage = async (message) => {
     console.error("[Sticker Generator] shapesColors failed:", e);
   }
   
-  // Пробуем заменить fills[0] на новый объект
+  // Пробуем заменить весь массив fills
   console.log("[Sticker Generator] rect.fills before:", rect.fills);
   try {
     const rgb = hexToRgb(color);
-    const newFill = {
+    const newFills = [{
       type: "solid",
       color: rgb,
       opacity: 1
-    };
-    rect.fills[0] = newFill;
-    console.log("[Sticker Generator] rect.fills[0] replaced with:", newFill);
+    }];
+    // Очищаем и добавляем новый
+    rect.fills.length = 0;
+    rect.fills.push(newFills[0]);
     console.log("[Sticker Generator] rect.fills after:", rect.fills);
-    console.log("[Sticker Generator] fills replaced successfully");
+    console.log("[Sticker Generator] fills pushed successfully");
   } catch (e) {
-    console.error("[Sticker Generator] rect.fills replacement failed:", e);
+    console.error("[Sticker Generator] rect.fills push failed:", e);
   }
     
   // Выделяем созданную группу
