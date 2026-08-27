@@ -1,6 +1,6 @@
 console.log("[Sticker Generator] plugin.js loaded");
 
-// Открываем UI, только если penpot.ui доступен
+// Открываем UI только если penpot.ui.open доступен
 if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
   penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
 } else {
@@ -127,13 +127,14 @@ const handleMessage = async (message) => {
   }
 };
 
-// Подписка на сообщения: приоритет penpot.ui.on
+// Подписка на сообщения от UI
+// В Penpot 2.17 penpot.ui.on отсутствует, поэтому используем window.addEventListener
 if (penpot.ui && typeof penpot.ui.on === "function") {
   penpot.ui.on("message", handleMessage);
-} else if (typeof penpot.on === "function") {
-  penpot.on("message", handleMessage);
 } else {
   window.addEventListener("message", (event) => {
-    if (event.data) handleMessage(event.data);
+    if (event && event.data) {
+      handleMessage(event.data);
+    }
   });
 }
