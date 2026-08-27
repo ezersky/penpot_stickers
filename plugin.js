@@ -168,7 +168,10 @@ const handleMessage = async (message) => {
   } catch (e) {
     console.error("[Sticker Generator] shapesColors failed:", e);
   }
-
+  console.log("[Sticker Generator] rect.fillColor:", rect.fillColor);
+  console.log("[Sticker Generator] rect.style:", rect.style);
+  console.log("[Sticker Generator] rect.fills:", rect.fills);
+  
   // Выделяем созданную группу
   if (penpot.selection !== undefined) {
     penpot.selection = [group];
