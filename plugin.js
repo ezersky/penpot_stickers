@@ -19,7 +19,14 @@ if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
 
 // Универсальный обработчик сообщений
 const handleMessage = async (message) => {
-  if (!message || message.type !== "create-sticker") return;
+  console.log("[Sticker Generator] handleMessage called with:", message);
+
+  if (!message || message.type !== "create-sticker") {
+    console.log("[Sticker Generator] ignoring message, type:", message?.type);
+    return;
+  }
+
+  console.log("[Sticker Generator] creating sticker, text:", message.text, "color:", message.color);
 
   const text = message.text || "Стикер";
   const color = message.color || "#ffffff";
@@ -170,6 +177,16 @@ const handleMessage = async (message) => {
   if (penpot.selection !== undefined) {
     penpot.selection = [group];
   }
+
+  console.log("[Sticker Generator] sticker created successfully");
 };
 
-// Подписка на сообщения от
+// Подписка на сообщения от UI через penpot.ui.onMessage
+console.log("[Sticker Generator] penpot.ui.onMessage exists:", typeof penpot.ui?.onMessage === "function");
+
+if (penpot.ui && typeof penpot.ui.onMessage === "function") {
+  penpot.ui.onMessage(handleMessage);
+  console.log("[Sticker Generator] subscribed to onMessage");
+} else {
+  console.warn("[Sticker Generator] penpot.ui.onMessage is not available");
+}
