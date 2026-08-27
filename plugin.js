@@ -1,5 +1,15 @@
 console.log("[Sticker Generator] plugin.js loaded");
 
+// Хелпер: HEX -> RGB (0–1)
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  const bigint = parseInt(h, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return { r: r / 255, g: g / 255, b: b / 255 };
+}
+
 // Открываем UI
 if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
   penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
@@ -101,16 +111,19 @@ const handleMessage = async (message) => {
   rect.name = "Sticker Base";
   rect.borderRadius = 8;
 
-  // Исправленный формат заливки
+  // Исправленный формат заливки: color как { r, g, b }
+  const rgb = hexToRgb(color);
   rect.fills = [{
     type: "solid",
-    color: { hex: color },
+    color: rgb,
     opacity: 1
   }];
 
+  // Тень
+  const blackRgb = { r: 0, g: 0, b: 0 };
   rect.shadows = [{
     type: "drop-shadow",
-    color: { hex: "#000000" },
+    color: blackRgb,
     opacity: 0.12,
     offsetX: 0,
     offsetY: 4,
@@ -159,9 +172,4 @@ const handleMessage = async (message) => {
   }
 };
 
-// Подписка на сообщения от UI через penpot.ui.onMessage
-if (penpot.ui && typeof penpot.ui.onMessage === "function") {
-  penpot.ui.onMessage(handleMessage);
-} else {
-  console.warn("[Sticker Generator] penpot.ui.onMessage is not available");
-}
+// Подписка на сообщения от
