@@ -12,7 +12,7 @@ function hexToRgb(hex) {
 
 // Открываем UI
 if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
-  penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 350 });
+  penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
 } else {
   console.warn("[Sticker Generator] penpot.ui.open is not available");
 }
@@ -40,7 +40,7 @@ const handleMessage = async (message) => {
   try {
     rect = penpot.createRectangle({
       width: 200,
-      height: 200
+      height: 100
     });
   } catch (e1) {
     try {
@@ -60,6 +60,21 @@ const handleMessage = async (message) => {
 
   rect.name = "Sticker Base";
   rect.borderRadius = 8;
+
+  // Устанавливаем цвет СРАЗУ после создания
+  try {
+    const rgb = hexToRgb(color);
+    const newFills = [{
+      type: "solid",
+      color: rgb,
+      opacity: 1
+    }];
+    rect.fills.length = 0;
+    rect.fills.push(newFills[0]);
+    console.log("[Sticker Generator] rect.fills set before grouping, color:", color);
+  } catch (e) {
+    console.error("[Sticker Generator] rect.fills before grouping failed:", e);
+  }
 
   // 2. ПОТОМ создаем текстовый шейп
   let textShape;
@@ -156,33 +171,6 @@ const handleMessage = async (message) => {
   group.x = viewportCenterX - rectWidth / 2;
   group.y = viewportCenterY - rectHeight / 2;
 
-  // 4. Устанавливаем цвет прямоугольника
-  console.log("[Sticker Generator] calling shapesColors with rect:", rect, "color:", color);
-  try {
-    penpot.shapesColors([rect], color);
-    console.log("[Sticker Generator] shapesColors success");
-  } catch (e) {
-    console.error("[Sticker Generator] shapesColors failed:", e);
-  }
-  
-  // Пробуем заменить весь массив fills
-  console.log("[Sticker Generator] rect.fills before:", rect.fills);
-  try {
-    const rgb = hexToRgb(color);
-    const newFills = [{
-      type: "solid",
-      color: rgb,
-      opacity: 1
-    }];
-    // Очищаем и добавляем новый
-    rect.fills.length = 0;
-    rect.fills.push(newFills[0]);
-    console.log("[Sticker Generator] rect.fills after:", rect.fills);
-    console.log("[Sticker Generator] fills pushed successfully");
-  } catch (e) {
-    console.error("[Sticker Generator] rect.fills push failed:", e);
-  }
-    
   // Выделяем созданную группу
   if (penpot.selection !== undefined) {
     penpot.selection = [group];
