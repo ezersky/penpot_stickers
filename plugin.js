@@ -157,6 +157,7 @@ const handleMessage = async (message) => {
   group.y = viewportCenterY - rectHeight / 2;
 
   // 4. Устанавливаем цвет прямоугольника через penpot.shapesColors
+  console.log("[Sticker Generator] calling shapesColors with rect:", rect, "color:", color);
   try {
     penpot.shapesColors(rect, color);
     console.log("[Sticker Generator] shapesColors success");
