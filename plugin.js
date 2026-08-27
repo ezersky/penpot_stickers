@@ -1,102 +1,138 @@
 console.log("[Sticker Generator] plugin.js loaded");
 
-// Инициализируем интерфейс плагина
-penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
+// Открываем UI, только если penpot.ui доступен
+if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
+  penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
+} else {
+  console.warn("[Sticker Generator] penpot.ui.open is not available");
+}
 
 // Универсальный обработчик сообщений
 const handleMessage = async (message) => {
-  if (message && message.type === "create-sticker") {
-    const text = message.text || "Стикер";
-    const color = message.color || "#ffffff";
+  if (!message || message.type !== "create-sticker") return;
 
-    // 1. Создаем текстовый шейп
-    const textShape = penpot.createText();
-    if (!textShape) return;
-    
-    textShape.name = "Sticker Text";
+  const text = message.text || "Стикер";
+  const color = message.color || "#ffffff";
+
+  // 1. Создаем текстовый шейп
+  if (typeof penpot.createText !== "function") {
+    console.error("[Sticker Generator] penpot.createText is not available");
+    return;
+  }
+
+  const textShape = penpot.createText();
+  if (!textShape) return;
+
+  textShape.name = "Sticker Text";
+
+  // Пробуем несколько вариантов имени свойства для текста
+  if ("characters" in textShape) {
     textShape.characters = text;
-    
-    // Дефолтный шрифт Inter 15px
-    textShape.fontFamily = "Inter";
-    textShape.fontSize = 15;
+  } else if ("text" in textShape) {
+    textShape.text = text;
+  } else if ("content" in textShape) {
+    textShape.content = text;
+  }
 
-    // Включаем автоперенос (word wrap)
-    textShape.resize(200, 0); 
-    textShape.growType = "auto-height"; 
+  textShape.fontFamily = "Inter";
+  textShape.fontSize = 15;
 
-    // Цвет текста (темный графит)
-    textShape.fills = [{
-      type: "solid",
-      color: "#1e293b",
-      opacity: 1
-    }];
+  // Задаём ширину, высоту минимальную
+  textShape.resize(200, 1);
 
-    // Ждем обновления лейаута Penpot для точного расчета высоты текста
-    await penpot.waitForLayoutUpdate(); 
+  // Пробуем включить авто-высоту разными способами
+  if ("growType" in textShape) {
+    textShape.growType = "auto-height";
+  } else if ("autoHeight" in textShape) {
+    textShape.autoHeight = true;
+  }
 
-    const textWidth = textShape.width;
-    const textHeight = textShape.height;
+  // Ждем обновления лейаута
+  if (typeof penpot.waitForLayoutUpdate === "function") {
+    await penpot.waitForLayoutUpdate();
+  }
 
-    // Внутренние отступы
-    const paddingX = 24;
-    const paddingY = 20;
+  const textWidth = textShape.width || 0;
+  const textHeight = textShape.height || 0;
 
-    const rectWidth = textWidth + (paddingX * 2);
-    const rectHeight = textHeight + (paddingY * 2);
+  // Внутренние отступы
+  const paddingX = 24;
+  const paddingY = 20;
 
-    // 2. Создаем прямоугольную подложку
-    const rect = penpot.createRectangle();
-    if (!rect) return;
+  const rectWidth = textWidth + paddingX * 2;
+  const rectHeight = textHeight + paddingY * 2;
 
-    rect.name = "Sticker Base";
-    rect.resize(rectWidth, rectHeight);
-    rect.borderRadius = 8;
-    
-    rect.fills = [{
-      type: "solid",
-      color: color,
-      opacity: 1
-    }];
+  // 2. Создаем прямоугольную подложку
+  if (typeof penpot.createRectangle !== "function") {
+    console.error("[Sticker Generator] penpot.createRectangle is not available");
+    return;
+  }
 
-    // Эффект мягкой тени
-    rect.shadows = [{
-      type: "drop-shadow",
-      color: "#000000",
-      opacity: 0.12,
-      offsetX: 0,
-      offsetY: 4,
-      blur: 10,
-      spread: 0
-    }];
+  const rect = penpot.createRectangle();
+  if (!rect) return;
 
-    // Центрируем текст на подложке
-    textShape.x = paddingX;
-    textShape.y = paddingY;
+  rect.name = "Sticker Base";
+  rect.resize(rectWidth, rectHeight);
+  rect.borderRadius = 8;
 
-    // 3. Группируем элементы на холсте
-    const group = penpot.createGroup([rect, textShape]);
-    if (group) {
-      group.name = `Sticker: ${text.slice(0, 12)}...`;
-      
-      // Центрируем относительно экрана пользователя
-      group.x = penpot.viewport.center.x - (rectWidth / 2);
-      group.y = penpot.viewport.center.y - (rectHeight / 2);
+  rect.fills = [{
+    type: "solid",
+    color: color,
+    opacity: 1
+  }];
 
-      // Фокусируем выделение
-      penpot.selection = [group];
-    }
+  rect.shadows = [{
+    type: "drop-shadow",
+    color: "#000000",
+    opacity: 0.12,
+    offsetX: 0,
+    offsetY: 4,
+    blur: 10,
+    spread: 0
+  }];
+
+  // Центрируем текст на подложке
+  textShape.x = paddingX;
+  textShape.y = paddingY;
+
+  // 3. Группируем элементы
+  if (typeof penpot.createGroup !== "function") {
+    console.error("[Sticker Generator] penpot.createGroup is not available");
+    return;
+  }
+
+  const group = penpot.createGroup([rect, textShape]);
+  if (!group) return;
+
+  group.name = `Sticker: ${text.slice(0, 12)}${text.length > 12 ? "..." : ""}`;
+
+  // Центрирование относительно вьюпорта
+  let viewportCenterX = 0;
+  let viewportCenterY = 0;
+
+  if (penpot.viewport && penpot.viewport.center) {
+    viewportCenterX = penpot.viewport.center.x;
+    viewportCenterY = penpot.viewport.center.y;
+  } else if (penpot.viewport) {
+    viewportCenterX = (penpot.viewport.width || 0) / 2;
+    viewportCenterY = (penpot.viewport.height || 0) / 2;
+  }
+
+  group.x = viewportCenterX - rectWidth / 2;
+  group.y = viewportCenterY - rectHeight / 2;
+
+  // Выделяем созданную группу
+  if (penpot.selection !== undefined) {
+    penpot.selection = [group];
   }
 };
 
-// ЗАЩИТА ОТ КОНФЛИКТОВ API: Проверяем, какой метод подписки доступен в текущей версии Penpot
-if (typeof penpot.on === "function") {
-  // Актуальный современный метод
-  penpot.on("message", handleMessage);
-} else if (penpot.ui && typeof penpot.ui.on === "function") {
-  // Устаревший метод (на случай, если движок инстанса требует его)
+// Подписка на сообщения: приоритет penpot.ui.on
+if (penpot.ui && typeof penpot.ui.on === "function") {
   penpot.ui.on("message", handleMessage);
+} else if (typeof penpot.on === "function") {
+  penpot.on("message", handleMessage);
 } else {
-  // Глобальный фолбек для старых сборок среды
   window.addEventListener("message", (event) => {
     if (event.data) handleMessage(event.data);
   });
