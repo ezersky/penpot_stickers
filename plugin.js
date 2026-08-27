@@ -143,4 +143,34 @@ const handleMessage = async (message) => {
   group.name = `Sticker: ${text.slice(0, 12)}${text.length > 12 ? "..." : ""}`;
 
   // Центрирование относительно вьюпорта
-  let
+  let viewportCenterX = 0;
+  let viewportCenterY = 0;
+
+  if (penpot.viewport && penpot.viewport.center) {
+    viewportCenterX = penpot.viewport.center.x;
+    viewportCenterY = penpot.viewport.center.y;
+  } else if (penpot.viewport) {
+    viewportCenterX = (penpot.viewport.width || 0) / 2;
+    viewportCenterY = (penpot.viewport.height || 0) / 2;
+  }
+
+  group.x = viewportCenterX - rectWidth / 2;
+  group.y = viewportCenterY - rectHeight / 2;
+
+  // Выделяем созданную группу
+  if (penpot.selection !== undefined) {
+    penpot.selection = [group];
+  }
+
+  console.log("[Sticker Generator] sticker created successfully");
+};
+
+// Подписка на сообщения от UI через penpot.ui.onMessage
+console.log("[Sticker Generator] penpot.ui.onMessage exists:", typeof penpot.ui?.onMessage === "function");
+
+if (penpot.ui && typeof penpot.ui.onMessage === "function") {
+  penpot.ui.onMessage(handleMessage);
+  console.log("[Sticker Generator] subscribed to onMessage");
+} else {
+  console.warn("[Sticker Generator] penpot.ui.onMessage is not available");
+}
