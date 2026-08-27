@@ -156,13 +156,36 @@ const handleMessage = async (message) => {
   group.x = viewportCenterX - rectWidth / 2;
   group.y = viewportCenterY - rectHeight / 2;
 
-  // 4. Устанавливаем цвет прямоугольника через penpot.replaceColor
-  // Пробуем заменить текущий цвет на нужный
+  // 4. Устанавливаем цвет прямоугольника через rect.fills
+  // Пробуем разные форматы
   try {
-    const rgb = hexToRgb(color);
-    penpot.replaceColor(rect, { r: 0, g: 0, b: 0 }, rgb); // заменяем чёрный на нужный цвет
-  } catch (e) {
-    console.error("[Sticker Generator] replaceColor failed:", e);
+    // Вариант 1: color как строка HEX
+    rect.fills = [{
+      type: "solid",
+      color: color,
+      opacity: 1
+    }];
+  } catch (e1) {
+    try {
+      // Вариант 2: color как число
+      const colorNum = parseInt(color.replace('#', ''), 16);
+      rect.fills = [{
+        type: "solid",
+        color: colorNum,
+        opacity: 1
+      }];
+    } catch (e2) {
+      try {
+        // Вариант 3: color как { hex: string }
+        rect.fills = [{
+          type: "solid",
+          color: { hex: color },
+          opacity: 1
+        }];
+      } catch (e3) {
+        console.error("[Sticker Generator] fills failed:", e1, e2, e3);
+      }
+    }
   }
 
   // Выделяем созданную группу
