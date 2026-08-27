@@ -1,4 +1,5 @@
 console.log("[Sticker Generator] plugin.js loaded");
+console.log("[Sticker Generator] penpot.utils keys:", Object.keys(penpot.utils || {}));
 
 // Хелпер: HEX -> RGB (0–1)
 function hexToRgb(hex) {
