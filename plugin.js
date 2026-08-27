@@ -1,6 +1,5 @@
 console.log("[Sticker Generator] plugin.js loaded");
 
-/*
 // Хелпер: HEX -> RGB (0–1)
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
@@ -175,4 +174,3 @@ if (penpot.ui && typeof penpot.ui.onMessage === "function") {
 } else {
   console.warn("[Sticker Generator] penpot.ui.onMessage is not available");
 }
-*/
