@@ -118,25 +118,9 @@ const handleMessage = async (message) => {
   rect.name = "Sticker Base";
   rect.borderRadius = 8;
 
-  // Исправленный формат заливки: color как { r, g, b }
-  const rgb = hexToRgb(color);
-  rect.fills = [{
-    type: "solid",
-    color: rgb,
-    opacity: 1
-  }];
-
-  // Тень
-  const blackRgb = { r: 0, g: 0, b: 0 };
-  rect.shadows = [{
-    type: "drop-shadow",
-    color: blackRgb,
-    opacity: 0.12,
-    offsetX: 0,
-    offsetY: 4,
-    blur: 10,
-    spread: 0
-  }];
+  // ВРЕМЕННО НЕ УСТАНАВЛИВАЕМ fills и shadows, чтобы проверить, работает ли без них
+  // rect.fills = [...];
+  // rect.shadows = [...];
 
   // Центрируем текст на подложке
   textShape.x = paddingX;
