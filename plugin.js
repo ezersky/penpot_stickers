@@ -15,10 +15,8 @@ const handleMessage = async (message) => {
   const color = message.color || "#ffffff";
 
   // 1. Создаем текстовый шейп
-  // В Penpot 2.17 createText требует параметры
   let textShape;
   try {
-    // Пробуем вариант с объектом параметров
     textShape = penpot.createText({
       text: text,
       fontFamily: "Inter",
@@ -26,7 +24,6 @@ const handleMessage = async (message) => {
     });
   } catch (e1) {
     try {
-      // Пробуем вариант с позиционными аргументами
       textShape = penpot.createText(text, "Inter", 15);
     } catch (e2) {
       console.error("[Sticker Generator] createText failed:", e1, e2);
@@ -41,16 +38,13 @@ const handleMessage = async (message) => {
 
   textShape.name = "Sticker Text";
 
-  // Если текст не установился через createText, пробуем задать отдельно
-  if (!textShape.characters && !textShape.text && !textShape.content) {
-    // Пробуем разные варианты
-    if ("characters" in textShape) {
-      textShape.characters = text;
-    } else if ("text" in textShape) {
-      textShape.text = text;
-    } else if ("content" in textShape) {
-      textShape.content = text;
-    }
+  // Устанавливаем текст через правильное свойство
+  if ("characters" in textShape) {
+    textShape.characters = text;
+  } else if ("text" in textShape) {
+    textShape.text = text;
+  } else if ("content" in textShape) {
+    textShape.content = text;
   }
 
   textShape.fontFamily = "Inter";
@@ -107,15 +101,16 @@ const handleMessage = async (message) => {
   rect.name = "Sticker Base";
   rect.borderRadius = 8;
 
+  // Исправленный формат заливки
   rect.fills = [{
     type: "solid",
-    color: color,
+    color: { hex: color },
     opacity: 1
   }];
 
   rect.shadows = [{
     type: "drop-shadow",
-    color: "#000000",
+    color: { hex: "#000000" },
     opacity: 0.12,
     offsetX: 0,
     offsetY: 4,
@@ -132,41 +127,4 @@ const handleMessage = async (message) => {
   try {
     group = penpot.createGroup([rect, textShape]);
   } catch (e) {
-    console.error("[Sticker Generator] createGroup failed:", e);
-    return;
-  }
-
-  if (!group) {
-    console.error("[Sticker Generator] createGroup returned null/undefined");
-    return;
-  }
-
-  group.name = `Sticker: ${text.slice(0, 12)}${text.length > 12 ? "..." : ""}`;
-
-  // Центрирование относительно вьюпорта
-  let viewportCenterX = 0;
-  let viewportCenterY = 0;
-
-  if (penpot.viewport && penpot.viewport.center) {
-    viewportCenterX = penpot.viewport.center.x;
-    viewportCenterY = penpot.viewport.center.y;
-  } else if (penpot.viewport) {
-    viewportCenterX = (penpot.viewport.width || 0) / 2;
-    viewportCenterY = (penpot.viewport.height || 0) / 2;
-  }
-
-  group.x = viewportCenterX - rectWidth / 2;
-  group.y = viewportCenterY - rectHeight / 2;
-
-  // Выделяем созданную группу
-  if (penpot.selection !== undefined) {
-    penpot.selection = [group];
-  }
-};
-
-// Подписка на сообщения от UI через penpot.ui.onMessage
-if (penpot.ui && typeof penpot.ui.onMessage === "function") {
-  penpot.ui.onMessage(handleMessage);
-} else {
-  console.warn("[Sticker Generator] penpot.ui.onMessage is not available");
-}
+    console.error("[Sticker Generator] createGroup failed:",
