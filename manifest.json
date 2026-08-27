@@ -1,0 +1,10 @@
+{
+  "name": "Sticker Generator",
+  "description": "Создает настраиваемые стикеры с авторазмером, тенями и редактируемым текстом",
+  "version": 2,
+  "code": "plugin.js",
+  "icon": "icon.png",
+  "permissions": [
+    "content:write"
+  ]
+}

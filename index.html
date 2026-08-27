@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    :root {
+      --bg-main: #1e1e1e;          /* Родной темный фон Penpot UI */
+      --bg-input: #2d2d2d;         /* Фон инпутов */
+      --border-color: #3e3e3e;     /* Разделители границ */
+      --text-primary: #f3f4f6;     /* Основной светлый текст */
+      --text-muted: #9ca3af;       /* Вторичный приглушенный текст */
+      --accent: #22c55e;           /* Фирменный зеленый Penpot */
+      --accent-hover: #16a34a;     /* Зеленый при наведении */
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 16px;
+      margin: 0;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    textarea {
+      resize: none;
+      height: 64px;
+      font-family: inherit;
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://w3.org' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
+      cursor: pointer;
+    }
+
+    .custom-color-container {
+      display: none;
+      margin-top: 8px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: var(--accent);
+      color: #000000;              /* Контрастный черный текст на зеленой кнопке */
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+      margin-top: 4px;
+    }
+
+    button:hover {
+      background-color: var(--accent-hover);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="field">
+    <label for="sticker-text">Текст стикера</label>
+    <textarea id="sticker-text" placeholder="Введите текст..."></textarea>
+  </div>
+
+  <div class="field">
+    <label for="color-preset">Цвет подложки</label>
+    <select id="color-preset" onchange="toggleCustomColor()">
+      <option value="#ffffff">Белый</option>
+      <option value="#fef08a">Жёлтый</option>
+      <option value="#bbf7d0">Зелёный</option>
+      <option value="custom">Свой (HEX)</option>
+    </select>
+    
+    <div id="custom-color-box" class="custom-color-container">
+      <input type="text" id="custom-hex" placeholder="#ff0000" value="#ff0000">
+    </div>
+  </div>
+
+  <button id="create-btn">Создать стикер</button>
+
+  <script>
+    function toggleCustomColor() {
+      const preset = document.getElementById('color-preset').value;
+      const customBox = document.getElementById('custom-color-box');
+      customBox.style.display = preset === 'custom' ? 'block' : 'none';
+    }
+
+    document.getElementById('create-btn').addEventListener('click', () => {
+      const text = document.getElementById('sticker-text').value || "Стикер";
+      const presetColor = document.getElementById('color-preset').value;
+      
+      let finalColor = presetColor;
+      if (presetColor === 'custom') {
+        finalColor = document.getElementById('custom-hex').value.trim();
+        if (!finalColor.startsWith('#')) {
+          finalColor = '#' + finalColor;
+        }
+      }
+
+      // Отправляем структурированные данные в Penpot API
+      parent.postMessage({
+        type: 'create-sticker',
+        text: String(text),
+        color: String(finalColor)
+      }, '*');
+    });
+  </script>
+</body>
+</html>
