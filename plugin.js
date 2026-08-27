@@ -39,8 +39,8 @@ const handleMessage = async (message) => {
   let rect;
   try {
     rect = penpot.createRectangle({
-      width: 200, // временная ширина, потом изменим
-      height: 100 // временная высота
+      width: 200,
+      height: 100
     });
   } catch (e1) {
     try {
@@ -60,10 +60,6 @@ const handleMessage = async (message) => {
 
   rect.name = "Sticker Base";
   rect.borderRadius = 8;
-
-  // ВРЕМЕННО НЕ УСТАНАВЛИВАЕМ fills и shadows
-  // rect.fills = [...];
-  // rect.shadows = [...];
 
   // 2. ПОТОМ создаем текстовый шейп
   let textShape;
@@ -159,6 +155,15 @@ const handleMessage = async (message) => {
 
   group.x = viewportCenterX - rectWidth / 2;
   group.y = viewportCenterY - rectHeight / 2;
+
+  // 4. Устанавливаем цвет прямоугольника через penpot.replaceColor
+  // Пробуем заменить текущий цвет на нужный
+  try {
+    const rgb = hexToRgb(color);
+    penpot.replaceColor(rect, { r: 0, g: 0, b: 0 }, rgb); // заменяем чёрный на нужный цвет
+  } catch (e) {
+    console.error("[Sticker Generator] replaceColor failed:", e);
+  }
 
   // Выделяем созданную группу
   if (penpot.selection !== undefined) {
