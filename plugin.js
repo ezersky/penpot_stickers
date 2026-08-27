@@ -1,6 +1,4 @@
 console.log("[Sticker Generator] plugin.js loaded");
-console.log("[Sticker Generator] penpot.shapesColors:", penpot.shapesColors);
-console.log("[Sticker Generator] rect keys before fills:", Object.keys(rect || {}));
 
 // Хелпер: HEX -> RGB (0–1)
 function hexToRgb(hex) {
@@ -14,7 +12,7 @@ function hexToRgb(hex) {
 
 // Открываем UI
 if (penpot && penpot.ui && typeof penpot.ui.open === "function") {
-  penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
+  penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 350 });
 } else {
   console.warn("[Sticker Generator] penpot.ui.open is not available");
 }
@@ -42,7 +40,7 @@ const handleMessage = async (message) => {
   try {
     rect = penpot.createRectangle({
       width: 200,
-      height: 100
+      height: 200
     });
   } catch (e1) {
     try {
@@ -158,36 +156,12 @@ const handleMessage = async (message) => {
   group.x = viewportCenterX - rectWidth / 2;
   group.y = viewportCenterY - rectHeight / 2;
 
-  // 4. Устанавливаем цвет прямоугольника через rect.fills
-  // Пробуем разные форматы
+  // 4. Устанавливаем цвет прямоугольника через penpot.shapesColors
   try {
-    // Вариант 1: color как строка HEX
-    rect.fills = [{
-      type: "solid",
-      color: color,
-      opacity: 1
-    }];
-  } catch (e1) {
-    try {
-      // Вариант 2: color как число
-      const colorNum = parseInt(color.replace('#', ''), 16);
-      rect.fills = [{
-        type: "solid",
-        color: colorNum,
-        opacity: 1
-      }];
-    } catch (e2) {
-      try {
-        // Вариант 3: color как { hex: string }
-        rect.fills = [{
-          type: "solid",
-          color: { hex: color },
-          opacity: 1
-        }];
-      } catch (e3) {
-        console.error("[Sticker Generator] fills failed:", e1, e2, e3);
-      }
-    }
+    penpot.shapesColors(rect, color);
+    console.log("[Sticker Generator] shapesColors success");
+  } catch (e) {
+    console.error("[Sticker Generator] shapesColors failed:", e);
   }
 
   // Выделяем созданную группу
