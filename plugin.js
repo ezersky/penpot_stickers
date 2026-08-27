@@ -127,4 +127,41 @@ const handleMessage = async (message) => {
   try {
     group = penpot.createGroup([rect, textShape]);
   } catch (e) {
-    console.error("[Sticker Generator] createGroup failed:",
+    console.error("[Sticker Generator] createGroup failed:", e);
+    return;
+  }
+
+  if (!group) {
+    console.error("[Sticker Generator] createGroup returned null/undefined");
+    return;
+  }
+
+  group.name = `Sticker: ${text.slice(0, 12)}${text.length > 12 ? "..." : ""}`;
+
+  // Центрирование относительно вьюпорта
+  let viewportCenterX = 0;
+  let viewportCenterY = 0;
+
+  if (penpot.viewport && penpot.viewport.center) {
+    viewportCenterX = penpot.viewport.center.x;
+    viewportCenterY = penpot.viewport.center.y;
+  } else if (penpot.viewport) {
+    viewportCenterX = (penpot.viewport.width || 0) / 2;
+    viewportCenterY = (penpot.viewport.height || 0) / 2;
+  }
+
+  group.x = viewportCenterX - rectWidth / 2;
+  group.y = viewportCenterY - rectHeight / 2;
+
+  // Выделяем созданную группу
+  if (penpot.selection !== undefined) {
+    penpot.selection = [group];
+  }
+};
+
+// Подписка на сообщения от UI через penpot.ui.onMessage
+if (penpot.ui && typeof penpot.ui.onMessage === "function") {
+  penpot.ui.onMessage(handleMessage);
+} else {
+  console.warn("[Sticker Generator] penpot.ui.onMessage is not available");
+}
