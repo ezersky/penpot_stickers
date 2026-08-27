@@ -126,10 +126,10 @@ const handleMessage = async (message) => {
   textShape.x = paddingX;
   textShape.y = paddingY;
 
-  // 3. Группируем элементы
+  // 3. Группируем элементы (текст ПОВЕРХ прямоугольника)
   let group;
   try {
-    group = penpot.group([rect, textShape]);
+    group = penpot.group([textShape, rect]);
   } catch (e) {
     console.error("[Sticker Generator] group failed:", e);
     return;
