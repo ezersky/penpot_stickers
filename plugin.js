@@ -159,7 +159,7 @@ const handleMessage = async (message) => {
   // 4. Устанавливаем цвет прямоугольника через penpot.shapesColors
   console.log("[Sticker Generator] calling shapesColors with rect:", rect, "color:", color);
   try {
-    penpot.shapesColors(rect, color);
+    penpot.shapesColors([rect], color);
     console.log("[Sticker Generator] shapesColors success");
   } catch (e) {
     console.error("[Sticker Generator] shapesColors failed:", e);
