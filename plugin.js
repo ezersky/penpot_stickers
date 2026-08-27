@@ -171,6 +171,16 @@ const handleMessage = async (message) => {
   group.x = viewportCenterX - rectWidth / 2;
   group.y = viewportCenterY - rectHeight / 2;
 
+  // 4. Устанавливаем цвет для всей группы через shapesColors
+  if (penpot.shapesColors) {
+    try {
+      penpot.shapesColors([group], color);
+      console.log("[Sticker Generator] group color set via shapesColors, color:", color);
+    } catch (e) {
+      console.error("[Sticker Generator] shapesColors for group failed:", e);
+    }
+  }
+
   // Выделяем созданную группу
   if (penpot.selection !== undefined) {
     penpot.selection = [group];
