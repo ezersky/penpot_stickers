@@ -1,6 +1,4 @@
 console.log("[Sticker Generator] plugin.js loaded");
-console.log("[Sticker Generator] penpot.utils keys:", Object.keys(penpot.utils || {}));
-console.log("[Sticker Generator] penpot.currentPage keys:", Object.keys(penpot.currentPage || {}));
 
 // Хелпер: HEX -> RGB (0–1)
 function hexToRgb(hex) {
@@ -33,7 +31,41 @@ const handleMessage = async (message) => {
   const text = message.text || "Стикер";
   const color = message.color || "#ffffff";
 
-  // 1. Создаем текстовый шейп
+  // Внутренние отступы
+  const paddingX = 24;
+  const paddingY = 20;
+
+  // 1. СНАЧАЛА создаем прямоугольную подложку
+  let rect;
+  try {
+    rect = penpot.createRectangle({
+      width: 200, // временная ширина, потом изменим
+      height: 100 // временная высота
+    });
+  } catch (e1) {
+    try {
+      rect = penpot.createRectangle(200, 100);
+    } catch (e2) {
+      rect = penpot.createRectangle();
+      if (rect) {
+        rect.resize(200, 100);
+      }
+    }
+  }
+
+  if (!rect) {
+    console.error("[Sticker Generator] createRectangle failed");
+    return;
+  }
+
+  rect.name = "Sticker Base";
+  rect.borderRadius = 8;
+
+  // ВРЕМЕННО НЕ УСТАНАВЛИВАЕМ fills и shadows
+  // rect.fills = [...];
+  // rect.shadows = [...];
+
+  // 2. ПОТОМ создаем текстовый шейп
   let textShape;
   try {
     textShape = penpot.createText({
@@ -87,51 +119,20 @@ const handleMessage = async (message) => {
   const textWidth = textShape.width || 0;
   const textHeight = textShape.height || 0;
 
-  // Внутренние отступы
-  const paddingX = 24;
-  const paddingY = 20;
-
   const rectWidth = textWidth + paddingX * 2;
   const rectHeight = textHeight + paddingY * 2;
 
-  // 2. Создаем прямоугольную подложку
-  let rect;
-  try {
-    rect = penpot.createRectangle({
-      width: rectWidth,
-      height: rectHeight
-    });
-  } catch (e1) {
-    try {
-      rect = penpot.createRectangle(rectWidth, rectHeight);
-    } catch (e2) {
-      rect = penpot.createRectangle();
-      if (rect) {
-        rect.resize(rectWidth, rectHeight);
-      }
-    }
-  }
-
-  if (!rect) {
-    console.error("[Sticker Generator] createRectangle failed");
-    return;
-  }
-
-  rect.name = "Sticker Base";
-  rect.borderRadius = 8;
-
-  // ВРЕМЕННО НЕ УСТАНАВЛИВАЕМ fills и shadows
-  // rect.fills = [...];
-  // rect.shadows = [...];
+  // Изменяем размер прямоугольника
+  rect.resize(rectWidth, rectHeight);
 
   // Центрируем текст на подложке
   textShape.x = paddingX;
   textShape.y = paddingY;
 
-  // 3. Группируем элементы (текст ПОВЕРХ прямоугольника)
+  // 3. Группируем элементы
   let group;
   try {
-    group = penpot.group([textShape, rect]);
+    group = penpot.group([rect, textShape]);
   } catch (e) {
     console.error("[Sticker Generator] group failed:", e);
     return;
