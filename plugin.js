@@ -128,13 +128,11 @@ const handleMessage = async (message) => {
 };
 
 // Подписка на сообщения от UI
-// В Penpot 2.17 penpot.ui.on отсутствует, поэтому используем window.addEventListener
+// В Penpot 2.17 нет ни penpot.ui.on, ни window, используем penpot.on
 if (penpot.ui && typeof penpot.ui.on === "function") {
   penpot.ui.on("message", handleMessage);
+} else if (typeof penpot.on === "function") {
+  penpot.on("message", handleMessage);
 } else {
-  window.addEventListener("message", (event) => {
-    if (event && event.data) {
-      handleMessage(event.data);
-    }
-  });
+  console.warn("[Sticker Generator] No message channel available");
 }
