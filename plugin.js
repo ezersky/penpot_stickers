@@ -1,50 +1,48 @@
 console.log("[Sticker Generator] plugin.js loaded");
 
-// Открываем интерфейс
+// Открываем нативный интерфейс Penpot UI
 penpot.ui.open("Sticker Generator", "index.html", { width: 260, height: 270 });
 
-// Асинхронный слушатель событий
-penpot.ui.on("message", async (message) => {
+// ИСПРАВЛЕНИЕ: В современном API Penpot слушатель сообщений вешается напрямую на объект penpot, а не на penpot.ui
+penpot.on("message", async (message) => {
+  // Проверяем валидность пришедшего из index.html сообщения
   if (message && message.type === "create-sticker") {
     const text = message.text || "Стикер";
     const color = message.color || "#ffffff";
 
-    // 1. Создаем текстовый шейп
+    // 1. Создаем текстовый объект
     const textShape = penpot.createText();
     if (!textShape) return;
     
     textShape.name = "Sticker Text";
     textShape.characters = text;
     
-    // Применяем настройки шрифта по умолчанию
+    // Задаем шрифт по умолчанию Inter 15px
     textShape.fontFamily = "Inter";
     textShape.fontSize = 15;
 
-    // ВАЖНО ДЛЯ WORD WRAP:
-    // Задаем базовую фиксированную ширину текстового контейнера (например, 200px)
+    // Включаем word wrap: фиксируем ширину текстового блока, высота подстроится под текст
     textShape.resize(200, 0); 
-    // Включаем авто-высоту. Теперь длинный текст будет переноситься на новые строки!
     textShape.growType = "auto-height"; 
 
-    // Настраиваем цвет шрифта (темный графит)
+    // Применяем темно-серый цвет для текста (высокий контраст)
     textShape.fills = [{
       type: "solid",
       color: "#1e293b",
       opacity: 1
     }];
 
-    // Асинхронно ждем, пока Penpot сделает перенос строк и обсчитает реальную итоговую высоту
+    // Ждем, пока Penpot обсчитает геометрию текстовых строк после переноса
     await penpot.waitForLayoutUpdate(); 
 
-    // Получаем финальные размеры текста после переноса слов
     const textWidth = textShape.width;
     const textHeight = textShape.height;
 
-    // Внутренние поля-отступы вокруг текста (padding)
-    const paddingX = 24; // Чуть увеличим для красоты длинных текстов
+    // Задаем внутренние отступы (padding)
+    const paddingX = 24;
     const paddingY = 20;
 
-    // Рассчитываем размер подложки
+    // Вычисляем итоговый размер подложки стикера
     const rectWidth = textWidth + (paddingX * 2);
     const rectHeight = textHeight + (paddingY * 2);
 
@@ -62,7 +60,7 @@ penpot.ui.on("message", async (message) => {
       opacity: 1
     }];
 
-    // Реалистичная мягкая тень
+    // Добавляем мягкую тень под стикер
     rect.shadows = [{
       type: "drop-shadow",
       color: "#000000",
@@ -77,17 +75,18 @@ penpot.ui.on("message", async (message) => {
     textShape.x = paddingX;
     textShape.y = paddingY;
 
-    // 3. Собираем в группу на холсте
+    // 3. Объединяем прямоугольник и текст в одну группу
     const group = penpot.createGroup([rect, textShape]);
     if (group) {
       group.name = `Sticker: ${text.slice(0, 15)}...`;
       
-      // Помещаем ровно по центру экрана пользователя
+      // Позиционируем по центру текущего экрана дизайнера
       group.x = penpot.viewport.center.x - (rectWidth / 2);
       group.y = penpot.viewport.center.y - (rectHeight / 2);
 
-      // Фокусируем выделение на новом объекте
+      // Автоматически выделяем созданный стикер
       penpot.selection = [group];
     }
   }
 });
+
