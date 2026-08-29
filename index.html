@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Stickers</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Stickers</h1>
+  <p class="hint">Выберите цвет, введите заголовок и текст — стикер вставится на холст, заголовок и текст можно будет отредактировать прямо в макете.</p>
+
+  <fieldset class="fieldset">
+    <legend>Цвет</legend>
+    <div id="color-swatches" class="color-swatches"></div>
+  </fieldset>
+
+  <div class="field-row-stack">
+    <label for="title-input">Заголовок</label>
+    <input type="text" id="title-input" placeholder="Sticker Yellow" value="Sticker">
+  </div>
+
+  <div class="field-row-stack">
+    <label for="text-input">Текст</label>
+    <textarea id="text-input" rows="3" placeholder="Sticker text or sticker long text in this field">Sticker text or sticker long text in this field</textarea>
+  </div>
+
+  <div id="status" class="status">
+    <span class="spinner" aria-hidden="true"></span>
+    <span id="status-text"></span>
+  </div>
+
+  <div class="preview-box">
+    <div id="preview" class="preview"></div>
+  </div>
+
+  <button type="button" id="add-btn" data-appearance="primary">Добавить стикер на холст</button>
+
+  <script type="module" src="ui.js"></script>
+</body>
+</html>
