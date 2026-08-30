@@ -93,6 +93,23 @@ function insertSticker(plan) {
   }
   group.name = plan.title ? `Sticker — ${plan.title}` : "Sticker";
 
+  // После группировки получаем реальную высоту текстов и подгоняем фон
+  const actualTitleHeight = titleText.height || titleHeight;
+  let totalContentHeight = plan.padding + actualTitleHeight;
+
+  if (bodyText) {
+    const actualBodyHeight = bodyText.height || (plan.bodyFontSize * 1.4);
+    totalContentHeight += plan.titleBodyGap + actualBodyHeight;
+  }
+
+  totalContentHeight += plan.padding;
+
+  // Обновляем высоту фона, если реальная высота больше запланированной
+  const finalHeight = Math.max(plan.height, totalContentHeight);
+  if (finalHeight !== plan.height) {
+    background.resize(plan.width, finalHeight);
+  }
+
   return { id: group.id, x: anchor.x, y: anchor.y };
 }
 
