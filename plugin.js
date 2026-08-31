@@ -47,7 +47,6 @@ function insertSticker(plan) {
 
   // Добавляем тень
   container.shadows = [{
-    id: crypto.randomUUID(),
     style: 'drop-shadow',
     offsetX: 0,
     offsetY: 2,
