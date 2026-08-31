@@ -1,7 +1,7 @@
 {
   "name": "Stickers",
   "description": "Создаёт цветные стикеры (заголовок + текст) и вставляет их на холст как редактируемые фигуры — текст можно менять прямо в макете.",
-  "version": 2,
+  "version": 3,
   "code": "plugin.js",
   "icon": "icon.png",
   "permissions": [
