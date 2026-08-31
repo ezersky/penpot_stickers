@@ -82,8 +82,8 @@ function insertSticker(plan) {
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
 
-  // Устанавливаем фиксированную ширину
-  titleText.width = plan.width - plan.padding * 2;
+  // Устанавливаем начальный размер через resize
+  titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
 
   // Добавляем в контейнер СНАЧАЛА
   container.appendChild(titleText);
@@ -111,8 +111,8 @@ function insertSticker(plan) {
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
 
-    // Устанавливаем фиксированную ширину
-    bodyText.width = plan.width - plan.padding * 2;
+    // Устанавливаем начальный размер через resize
+    bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
 
     // Добавляем в контейнер СНАЧАЛА
     container.appendChild(bodyText);
