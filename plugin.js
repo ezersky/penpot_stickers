@@ -85,19 +85,18 @@ function insertSticker(plan) {
   // Устанавливаем фиксированную ширину
   titleText.width = plan.width - plan.padding * 2;
 
-  // ВАЖНО: устанавливаем auto-height ДО добавления в контейнер
-  titleText.growType = "auto-height";
-
-  // Добавляем в контейнер
+  // Добавляем в контейнер СНАЧАЛА
   container.appendChild(titleText);
 
-  // Настраиваем layoutChild ПОСЛЕ appendChild - только горизонтальный sizing
+  // ВАЖНО: устанавливаем growType ПОСЛЕ appendChild
+  titleText.growType = "auto-height";
+  console.log("[Stickers] Set growType to auto-height on titleText");
+
+  // Настраиваем layoutChild
   if (titleText.layoutChild) {
-    console.log("[Stickers] Setting layoutChild on titleText");
     try {
       titleText.layoutChild.horizontalSizing = 'fill';
-      // verticalSizing НЕ трогаем - за это отвечает growType!
-      console.log("[Stickers] layoutChild set: horizontalSizing=fill");
+      console.log("[Stickers] layoutChild.horizontalSizing set to fill");
     } catch (e) {
       console.error("[Stickers] Failed to set layoutChild:", e);
     }
@@ -115,19 +114,18 @@ function insertSticker(plan) {
     // Устанавливаем фиксированную ширину
     bodyText.width = plan.width - plan.padding * 2;
 
-    // ВАЖНО: устанавливаем auto-height ДО добавления в контейнер
-    bodyText.growType = "auto-height";
-
-    // Добавляем в контейнер
+    // Добавляем в контейнер СНАЧАЛА
     container.appendChild(bodyText);
 
-    // Настраиваем layoutChild ПОСЛЕ appendChild - только горизонтальный sizing
+    // ВАЖНО: устанавливаем growType ПОСЛЕ appendChild
+    bodyText.growType = "auto-height";
+    console.log("[Stickers] Set growType to auto-height on bodyText");
+
+    // Настраиваем layoutChild
     if (bodyText.layoutChild) {
-      console.log("[Stickers] Setting layoutChild on bodyText");
       try {
         bodyText.layoutChild.horizontalSizing = 'fill';
-        // verticalSizing НЕ трогаем - за это отвечает growType!
-        console.log("[Stickers] bodyText layoutChild set successfully");
+        console.log("[Stickers] bodyText layoutChild.horizontalSizing set to fill");
       } catch (e) {
         console.error("[Stickers] Failed to set layoutChild on body:", e);
       }
