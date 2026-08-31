@@ -4,7 +4,7 @@
  * v6: Простая версия для проверки загрузки
  */
 
-console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-11-05 SIMPLE");
+console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-11-11");
 
 penpot.ui.open("Stickers", "index.html", { width: 360, height: 560 });
 
@@ -56,7 +56,25 @@ function insertSticker(plan) {
   container.verticalSizing = 'auto';
   container.horizontalSizing = 'fix';
 
-  // Создаем заголовок напрямую
+  // Создаем заголовок с autolayout контейнером
+  const headerContainer = penpot.createBoard();
+  headerContainer.name = "Header";
+  headerContainer.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
+
+  const headerFlex = headerContainer.addFlexLayout();
+  headerFlex.dir = 'column';
+  headerFlex.alignItems = 'start';
+  headerFlex.justifyContent = 'start';
+  headerFlex.rowGap = 0;
+  headerFlex.columnGap = 0;
+  headerFlex.topPadding = 0;
+  headerFlex.rightPadding = 0;
+  headerFlex.bottomPadding = 0;
+  headerFlex.leftPadding = 0;
+
+  headerContainer.verticalSizing = 'auto';
+  headerContainer.horizontalSizing = 'fill';
+
   const titleText = penpot.createText(plan.title);
   titleText.name = "Title";
   titleText.fontFamily = plan.fontFamily;
@@ -65,15 +83,41 @@ function insertSticker(plan) {
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
   titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
 
-  container.appendChild(titleText);
+  headerContainer.appendChild(titleText);
   titleText.growType = "auto-height";
 
   if (titleText.layoutChild) {
     titleText.layoutChild.horizontalSizing = 'fill';
   }
 
-  // Создаем body текст напрямую
+  container.appendChild(headerContainer);
+
+  if (headerContainer.layoutChild) {
+    headerContainer.layoutChild.horizontalSizing = 'fill';
+  }
+
+  console.log("[Stickers] Header container added");
+
+  // Создаем body текст с autolayout контейнером
   if (plan.text) {
+    const textContainer = penpot.createBoard();
+    textContainer.name = "Text";
+    textContainer.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
+
+    const textFlex = textContainer.addFlexLayout();
+    textFlex.dir = 'column';
+    textFlex.alignItems = 'start';
+    textFlex.justifyContent = 'start';
+    textFlex.rowGap = 0;
+    textFlex.columnGap = 0;
+    textFlex.topPadding = 0;
+    textFlex.rightPadding = 0;
+    textFlex.bottomPadding = 0;
+    textFlex.leftPadding = 0;
+
+    textContainer.verticalSizing = 'auto';
+    textContainer.horizontalSizing = 'fill';
+
     const bodyText = penpot.createText(plan.text);
     bodyText.name = "Body";
     bodyText.fontFamily = plan.fontFamily;
@@ -82,15 +126,23 @@ function insertSticker(plan) {
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
     bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
 
-    container.appendChild(bodyText);
+    textContainer.appendChild(bodyText);
     bodyText.growType = "auto-height";
 
     if (bodyText.layoutChild) {
       bodyText.layoutChild.horizontalSizing = 'fill';
     }
+
+    container.appendChild(textContainer);
+
+    if (textContainer.layoutChild) {
+      textContainer.layoutChild.horizontalSizing = 'fill';
+    }
+
+    console.log("[Stickers] Text container added");
   }
 
-  console.log("[Stickers] Simple sticker created successfully");
+  console.log("[Stickers] Sticker with nested autolayouts created successfully");
   return { id: container.id, x: anchor.x, y: anchor.y };
 }
 
