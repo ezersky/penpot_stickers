@@ -4,7 +4,7 @@
  * v5: Тестовая версия - проверяем доступные методы для Board
  */
 
-console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-10-38");
+console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-10-55");
 
 penpot.ui.open("Stickers", "index.html", { width: 360, height: 560 });
 
