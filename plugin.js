@@ -45,6 +45,22 @@ function insertSticker(plan) {
   container.fills = [{ fillColor: plan.bg, fillOpacity: 1 }];
   container.borderRadius = plan.radius;
 
+  // Добавляем тень
+  container.shadows = [{
+    id: crypto.randomUUID(),
+    style: 'drop-shadow',
+    offsetX: 0,
+    offsetY: 2,
+    blur: 8,
+    spread: 0,
+    hidden: false,
+    color: {
+      color: '#000000',
+      opacity: 0.15
+    }
+  }];
+  console.log("[Stickers] Shadow added to container");
+
   // Пробуем добавить flex layout, если метод существует
   if (typeof container.addFlexLayout === 'function') {
     console.log("[Stickers] addFlexLayout exists, trying to call...");
@@ -74,62 +90,90 @@ function insertSticker(plan) {
     console.warn("[Stickers] addFlexLayout method not found!");
   }
 
-  // Создаем заголовок
+  // Создаем заголовок с autolayout контейнером
+  const headerContainer = penpot.createBoard();
+  headerContainer.name = "Header";
+  headerContainer.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
+
+  const headerFlex = headerContainer.addFlexLayout();
+  headerFlex.dir = 'column';
+  headerFlex.alignItems = 'start';
+  headerFlex.justifyContent = 'start';
+  headerFlex.rowGap = 0;
+  headerFlex.columnGap = 0;
+  headerFlex.topPadding = 0;
+  headerFlex.rightPadding = 0;
+  headerFlex.bottomPadding = 0;
+  headerFlex.leftPadding = 0;
+  headerContainer.verticalSizing = 'auto';
+  headerContainer.horizontalSizing = 'fill';
+
   const titleText = penpot.createText(plan.title);
   titleText.name = "Title";
   titleText.fontFamily = plan.fontFamily;
   titleText.fontSize = String(plan.titleFontSize);
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-
-  // Устанавливаем начальный размер через resize
   titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
 
-  // Добавляем в контейнер СНАЧАЛА
-  container.appendChild(titleText);
-
-  // ВАЖНО: устанавливаем growType ПОСЛЕ appendChild
+  headerContainer.appendChild(titleText);
   titleText.growType = "auto-height";
-  console.log("[Stickers] Set growType to auto-height on titleText");
 
-  // Настраиваем layoutChild
   if (titleText.layoutChild) {
-    try {
-      titleText.layoutChild.horizontalSizing = 'fill';
-      console.log("[Stickers] layoutChild.horizontalSizing set to fill");
-    } catch (e) {
-      console.error("[Stickers] Failed to set layoutChild:", e);
-    }
+    titleText.layoutChild.horizontalSizing = 'fill';
   }
 
-  // Создаем body текст
+  // Добавляем header контейнер в основной контейнер
+  container.appendChild(headerContainer);
+
+  if (headerContainer.layoutChild) {
+    headerContainer.layoutChild.horizontalSizing = 'fill';
+  }
+
+  console.log("[Stickers] Header container with autolayout created");
+
+  // Создаем body текст с autolayout контейнером
   if (plan.text) {
+    const textContainer = penpot.createBoard();
+    textContainer.name = "Text";
+    textContainer.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
+
+    const textFlex = textContainer.addFlexLayout();
+    textFlex.dir = 'column';
+    textFlex.alignItems = 'start';
+    textFlex.justifyContent = 'start';
+    textFlex.rowGap = 0;
+    textFlex.columnGap = 0;
+    textFlex.topPadding = 0;
+    textFlex.rightPadding = 0;
+    textFlex.bottomPadding = 0;
+    textFlex.leftPadding = 0;
+    textContainer.verticalSizing = 'auto';
+    textContainer.horizontalSizing = 'fill';
+
     const bodyText = penpot.createText(plan.text);
     bodyText.name = "Body";
     bodyText.fontFamily = plan.fontFamily;
     bodyText.fontSize = String(plan.bodyFontSize);
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-
-    // Устанавливаем начальный размер через resize
     bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
 
-    // Добавляем в контейнер СНАЧАЛА
-    container.appendChild(bodyText);
-
-    // ВАЖНО: устанавливаем growType ПОСЛЕ appendChild
+    textContainer.appendChild(bodyText);
     bodyText.growType = "auto-height";
-    console.log("[Stickers] Set growType to auto-height on bodyText");
 
-    // Настраиваем layoutChild
     if (bodyText.layoutChild) {
-      try {
-        bodyText.layoutChild.horizontalSizing = 'fill';
-        console.log("[Stickers] bodyText layoutChild.horizontalSizing set to fill");
-      } catch (e) {
-        console.error("[Stickers] Failed to set layoutChild on body:", e);
-      }
+      bodyText.layoutChild.horizontalSizing = 'fill';
     }
+
+    // Добавляем text контейнер в основной контейнер
+    container.appendChild(textContainer);
+
+    if (textContainer.layoutChild) {
+      textContainer.layoutChild.horizontalSizing = 'fill';
+    }
+
+    console.log("[Stickers] Text container with autolayout created");
   }
 
   console.log("[Stickers] Sticker created successfully");
