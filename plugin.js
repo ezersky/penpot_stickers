@@ -81,23 +81,26 @@ function insertSticker(plan) {
   titleText.fontSize = String(plan.titleFontSize);
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-  titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
 
-  // Добавляем в контейнер СНАЧАЛА
+  // Устанавливаем фиксированную ширину
+  titleText.width = plan.width - plan.padding * 2;
+
+  // ВАЖНО: устанавливаем auto-height ДО добавления в контейнер
+  titleText.growType = "auto-height";
+
+  // Добавляем в контейнер
   container.appendChild(titleText);
 
-  // Настраиваем layoutChild ПОСЛЕ appendChild
+  // Настраиваем layoutChild ПОСЛЕ appendChild - только горизонтальный sizing
   if (titleText.layoutChild) {
-    console.log("[Stickers] Setting layoutChild on titleText, available properties:", Object.keys(titleText.layoutChild));
+    console.log("[Stickers] Setting layoutChild on titleText");
     try {
       titleText.layoutChild.horizontalSizing = 'fill';
-      titleText.layoutChild.verticalSizing = 'auto';
-      console.log("[Stickers] layoutChild set: horizontalSizing=fill, verticalSizing=auto");
+      // verticalSizing НЕ трогаем - за это отвечает growType!
+      console.log("[Stickers] layoutChild set: horizontalSizing=fill");
     } catch (e) {
       console.error("[Stickers] Failed to set layoutChild:", e);
     }
-  } else {
-    console.warn("[Stickers] layoutChild not available on titleText");
   }
 
   // Создаем body текст
@@ -108,23 +111,26 @@ function insertSticker(plan) {
     bodyText.fontSize = String(plan.bodyFontSize);
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-    bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
 
-    // Добавляем в контейнер СНАЧАЛА
+    // Устанавливаем фиксированную ширину
+    bodyText.width = plan.width - plan.padding * 2;
+
+    // ВАЖНО: устанавливаем auto-height ДО добавления в контейнер
+    bodyText.growType = "auto-height";
+
+    // Добавляем в контейнер
     container.appendChild(bodyText);
 
-    // Настраиваем layoutChild ПОСЛЕ appendChild
+    // Настраиваем layoutChild ПОСЛЕ appendChild - только горизонтальный sizing
     if (bodyText.layoutChild) {
       console.log("[Stickers] Setting layoutChild on bodyText");
       try {
         bodyText.layoutChild.horizontalSizing = 'fill';
-        bodyText.layoutChild.verticalSizing = 'auto';
+        // verticalSizing НЕ трогаем - за это отвечает growType!
         console.log("[Stickers] bodyText layoutChild set successfully");
       } catch (e) {
         console.error("[Stickers] Failed to set layoutChild on body:", e);
       }
-    } else {
-      console.warn("[Stickers] layoutChild not available on bodyText");
     }
   }
 
