@@ -38,7 +38,7 @@ function insertSticker(plan) {
   console.log("[Stickers] Board created, available methods:", Object.keys(container));
   console.log("[Stickers] Checking for addFlexLayout:", typeof container.addFlexLayout);
 
-  container.name = plan.title ? `Sticker — ${plan.title}` : "Sticker";
+  container.name = "Sticker"; // Переименовали в "Sticker"
   container.x = anchor.x;
   container.y = anchor.y;
   container.resize(plan.width, 200);
@@ -80,18 +80,26 @@ function insertSticker(plan) {
   titleText.fontSize = String(plan.titleFontSize);
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-  titleText.growType = "auto-height"; // Оставляем для совместимости
   titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
 
+  // Добавляем в контейнер СНАЧАЛА
   container.appendChild(titleText);
 
-  // Настраиваем layoutChild для работы в flex layout
+  // Настраиваем layoutChild ПОСЛЕ appendChild
   if (titleText.layoutChild) {
-    console.log("[Stickers] Setting layoutChild on titleText");
+    console.log("[Stickers] layoutChild available on titleText, properties:", Object.keys(titleText.layoutChild));
     try {
-      titleText.layoutChild.horizontalSizing = 'fill';
-      titleText.layoutChild.verticalSizing = 'auto'; // Auto height для flex layout
-      console.log("[Stickers] layoutChild set successfully on title");
+      // Пробуем разные способы установки auto height
+      if ('verticalSizing' in titleText.layoutChild) {
+        titleText.layoutChild.verticalSizing = 'auto';
+        console.log("[Stickers] Set verticalSizing to auto");
+      }
+      if ('horizontalSizing' in titleText.layoutChild) {
+        titleText.layoutChild.horizontalSizing = 'fill';
+        console.log("[Stickers] Set horizontalSizing to fill");
+      }
+      // Проверяем, есть ли другие свойства
+      console.log("[Stickers] layoutChild after setting:", titleText.layoutChild);
     } catch (e) {
       console.error("[Stickers] Failed to set layoutChild:", e);
     }
@@ -107,16 +115,21 @@ function insertSticker(plan) {
     bodyText.fontSize = String(plan.bodyFontSize);
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-    bodyText.growType = "auto-height"; // Оставляем для совместимости
     bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
 
+    // Добавляем в контейнер СНАЧАЛА
     container.appendChild(bodyText);
 
+    // Настраиваем layoutChild ПОСЛЕ appendChild
     if (bodyText.layoutChild) {
       console.log("[Stickers] Setting layoutChild on bodyText");
       try {
-        bodyText.layoutChild.horizontalSizing = 'fill';
-        bodyText.layoutChild.verticalSizing = 'auto'; // Auto height для flex layout
+        if ('verticalSizing' in bodyText.layoutChild) {
+          bodyText.layoutChild.verticalSizing = 'auto';
+        }
+        if ('horizontalSizing' in bodyText.layoutChild) {
+          bodyText.layoutChild.horizontalSizing = 'fill';
+        }
         console.log("[Stickers] layoutChild set successfully on body");
       } catch (e) {
         console.error("[Stickers] Failed to set layoutChild on body:", e);
