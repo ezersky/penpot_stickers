@@ -1,20 +1,10 @@
 /**
  * Stickers — plugin.js (sandbox context)
  *
- * v3: доска с flex-layout (autolayout) вместо трёх независимо позиционированных фигур,
- * плюс тень снизу под стикером.
- *
- * ВАЖНО про autolayout: официально подтверждённый баг Penpot (issue #8520, март 2026,
- * severity: High) — `flex.verticalSizing = 'auto'` тихо не работает: сеттер принимает
- * значение, геттер честно возвращает "auto", но доска физически НЕ обнимает высоту
- * контента. Официальный воркэраунд от авторов бага — тот, что применён здесь: посчитать
- * нужную высоту самостоятельно и явно вызвать resize(). Autolayout всё равно применяется
- * (flex-колонка с padding/gap) — он даёт корректное выравнивание заголовка и текста друг
- * относительно друга и одинаковые отступы со всех сторон, просто высоту доски мы
- * подстраховываем сами, а не полагаемся на "auto"/"fit-content" по вертикали.
+ * v6: Простая версия для проверки загрузки
  */
 
-console.log("[Stickers] plugin.js loaded");
+console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-11-11");
 
 penpot.ui.open("Stickers", "index.html", { width: 360, height: 560 });
 
@@ -22,12 +12,12 @@ const CASCADE_STEP = 24;
 const CASCADE_MAX = 6;
 let insertCount = 0;
 
-function nextAnchor(width, height) {
+function nextAnchor(width) {
   let base = { x: 0, y: 0 };
   try {
     const vp = penpot.viewport;
     if (vp && vp.center) {
-      base = { x: vp.center.x - width / 2, y: vp.center.y - height / 2 };
+      base = { x: vp.center.x - width / 2, y: vp.center.y - 100 };
     }
   } catch (e) {
     // используем (0,0), если viewport недоступен
@@ -37,67 +27,137 @@ function nextAnchor(width, height) {
   return { x: base.x + cascadeIndex * CASCADE_STEP, y: base.y + cascadeIndex * CASCADE_STEP };
 }
 
-function createStickerText(content, fontFamily, fontSize, fontWeight, textColor) {
-  const text = penpot.createText(content);
-  text.fontFamily = fontFamily;
-  text.fontSize = String(fontSize);
-  text.fontWeight = String(fontWeight);
-  text.fills = [{ fillColor: textColor, fillOpacity: 1 }];
-  text.growType = "auto-height";
-  return text;
-}
-
 function insertSticker(plan) {
-  const anchor = nextAnchor(plan.width, plan.height);
+  const anchor = nextAnchor(plan.width);
 
-  const board = penpot.createBoard();
-  board.x = anchor.x;
-  board.y = anchor.y;
-  // Высота посчитана заранее в ui.js (buildStickerPlan) — не полагаемся на flex-autoheight,
-  // см. комментарий про issue #8520 в шапке файла.
-  board.resize(plan.width, plan.height);
-  board.fills = [{ fillColor: plan.bg, fillOpacity: 1 }];
-  board.borderRadius = plan.radius;
+  console.log("[Stickers] Creating simple sticker...");
 
-  // Тень снизу под стикером.
-  board.shadows = [
-    {
-      style: "drop-shadow",
-      offsetX: 0,
-      offsetY: 4,
-      blur: 12,
-      spread: 0,
-      color: { color: "#000000", opacity: 0.18 },
-      hidden: false,
-    },
-  ];
+  // Создаем простой Board без вложенных контейнеров
+  const container = penpot.createBoard();
+  container.name = "Sticker";
+  container.x = anchor.x;
+  container.y = anchor.y;
+  container.resize(plan.width, 200);
+  container.fills = [{ fillColor: plan.bg, fillOpacity: 1 }];
+  container.borderRadius = plan.radius;
 
-  const flex = board.addFlexLayout();
-  flex.dir = "column";
+  // Добавляем flex layout
+  const flex = container.addFlexLayout();
+  flex.dir = 'column';
+  flex.alignItems = 'start';
+  flex.justifyContent = 'start';
   flex.rowGap = plan.titleBodyGap;
+  flex.columnGap = 0;
   flex.topPadding = plan.padding;
   flex.rightPadding = plan.padding;
   flex.bottomPadding = plan.padding;
   flex.leftPadding = plan.padding;
-  flex.alignItems = "stretch";
-  flex.justifyContent = "start";
-  // Задаём "auto" на будущее (если Penpot когда-нибудь починит issue #8520, стикер начнёт
-  // обниматься по высоте сам собой) — но НЕ полагаемся на это сегодня, высота уже зафиксирована
-  // явным resize() выше.
-  flex.verticalSizing = "auto";
-  flex.horizontalSizing = "fix";
 
-  const titleText = createStickerText(plan.title, plan.fontFamily, plan.titleFontSize, "700", plan.textColor);
-  board.appendChild(titleText);
+  container.verticalSizing = 'auto';
+  container.horizontalSizing = 'fix';
 
-  if (plan.text) {
-    const bodyText = createStickerText(plan.text, plan.fontFamily, plan.bodyFontSize, "400", plan.textColor);
-    board.appendChild(bodyText);
+  // Создаем заголовок с autolayout контейнером
+  const headerContainer = penpot.createBoard();
+  headerContainer.name = "Header";
+  headerContainer.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
+
+  const headerFlex = headerContainer.addFlexLayout();
+  headerFlex.dir = 'column';
+  headerFlex.alignItems = 'start';
+  headerFlex.justifyContent = 'start';
+  headerFlex.rowGap = 0;
+  headerFlex.columnGap = 0;
+  headerFlex.topPadding = 0;
+  headerFlex.rightPadding = 0;
+  headerFlex.bottomPadding = 0;
+  headerFlex.leftPadding = 0;
+
+  // Настраиваем auto height для контейнера заголовка
+  headerContainer.verticalSizing = 'auto';
+  headerContainer.horizontalSizing = 'fixed';
+
+  const titleText = penpot.createText(plan.title);
+  titleText.name = "Title";
+  titleText.fontFamily = plan.fontFamily;
+  titleText.fontSize = String(plan.titleFontSize);
+  titleText.fontWeight = "700";
+  titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
+  titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
+  titleText.growType = "auto-height";
+
+  // Добавляем текст в контейнер
+  headerContainer.appendChild(titleText);
+
+  // Настраиваем layoutChild для текста внутри flex контейнера
+  if (titleText.layoutChild) {
+    titleText.layoutChild.horizontalSizing = 'fill';
+    titleText.layoutChild.verticalSizing = 'auto';
   }
 
-  board.name = plan.title ? `Sticker — ${plan.title}` : "Sticker";
+  // Добавляем контейнер заголовка в главный контейнер
+  container.appendChild(headerContainer);
 
-  return { id: board.id, x: anchor.x, y: anchor.y };
+  // Настраиваем layoutChild для контейнера заголовка внутри главного flex контейнера
+  if (headerContainer.layoutChild) {
+    headerContainer.layoutChild.horizontalSizing = 'fill';
+    headerContainer.layoutChild.verticalSizing = 'auto';
+  }
+
+  console.log("[Stickers] Header container added");
+
+  // Создаем body текст с autolayout контейнером
+  if (plan.text) {
+    const textContainer = penpot.createBoard();
+    textContainer.name = "Text";
+    textContainer.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
+
+    const textFlex = textContainer.addFlexLayout();
+    textFlex.dir = 'column';
+    textFlex.alignItems = 'start';
+    textFlex.justifyContent = 'start';
+    textFlex.rowGap = 0;
+    textFlex.columnGap = 0;
+    textFlex.topPadding = 0;
+    textFlex.rightPadding = 0;
+    textFlex.bottomPadding = 0;
+    textFlex.leftPadding = 0;
+
+    // Настраиваем auto height для контейнера текста
+    textContainer.verticalSizing = 'auto';
+    textContainer.horizontalSizing = 'fixed';
+
+    const bodyText = penpot.createText(plan.text);
+    bodyText.name = "Body";
+    bodyText.fontFamily = plan.fontFamily;
+    bodyText.fontSize = String(plan.bodyFontSize);
+    bodyText.fontWeight = "400";
+    bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
+    bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
+    bodyText.growType = "auto-height";
+
+    // Добавляем текст в контейнер
+    textContainer.appendChild(bodyText);
+
+    // Настраиваем layoutChild для текста внутри flex контейнера
+    if (bodyText.layoutChild) {
+      bodyText.layoutChild.horizontalSizing = 'fill';
+      bodyText.layoutChild.verticalSizing = 'auto';
+    }
+
+    // Добавляем контейнер текста в главный контейнер
+    container.appendChild(textContainer);
+
+    // Настраиваем layoutChild для контейнера текста внутри главного flex контейнера
+    if (textContainer.layoutChild) {
+      textContainer.layoutChild.horizontalSizing = 'fill';
+      textContainer.layoutChild.verticalSizing = 'auto';
+    }
+
+    console.log("[Stickers] Text container added");
+  }
+
+  console.log("[Stickers] Sticker with nested autolayouts created successfully");
+  return { id: container.id, x: anchor.x, y: anchor.y };
 }
 
 penpot.ui.onMessage((message) => {
