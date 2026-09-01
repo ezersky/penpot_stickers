@@ -121,7 +121,6 @@ function insertSticker(plan) {
 
   if (titleText.layoutChild) {
     titleText.layoutChild.horizontalSizing = 'fill';
-    titleText.layoutChild.verticalSizing = 'auto';
   }
 
   // Добавляем header контейнер в основной контейнер
@@ -129,7 +128,6 @@ function insertSticker(plan) {
 
   if (headerContainer.layoutChild) {
     headerContainer.layoutChild.horizontalSizing = 'fill';
-    headerContainer.layoutChild.verticalSizing = 'auto';
   }
 
   console.log("[Stickers] Header container with autolayout created");
@@ -167,7 +165,6 @@ function insertSticker(plan) {
 
     if (bodyText.layoutChild) {
       bodyText.layoutChild.horizontalSizing = 'fill';
-      bodyText.layoutChild.verticalSizing = 'auto';
     }
 
     // Добавляем text контейнер в основной контейнер
@@ -175,7 +172,6 @@ function insertSticker(plan) {
 
     if (textContainer.layoutChild) {
       textContainer.layoutChild.horizontalSizing = 'fill';
-      textContainer.layoutChild.verticalSizing = 'auto';
     }
 
     console.log("[Stickers] Text container with autolayout created");
