@@ -1,10 +1,10 @@
 /**
  * Stickers — plugin.js (sandbox context)
  *
- * v6: Простая версия для проверки загрузки
+ * v5: Тестовая версия - проверяем доступные методы для Board
  */
 
-console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-11-11");
+console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-10-55");
 
 penpot.ui.open("Stickers", "index.html", { width: 360, height: 560 });
 
@@ -30,31 +30,64 @@ function nextAnchor(width) {
 function insertSticker(plan) {
   const anchor = nextAnchor(plan.width);
 
-  console.log("[Stickers] Creating simple sticker...");
+  console.log("[Stickers] Creating board...");
 
-  // Создаем простой Board без вложенных контейнеров
+  // Создаем Board
   const container = penpot.createBoard();
-  container.name = "Sticker";
+
+  console.log("[Stickers] Board created, available methods:", Object.keys(container));
+  console.log("[Stickers] Checking for addFlexLayout:", typeof container.addFlexLayout);
+
+  container.name = "Sticker"; // Переименовали в "Sticker"
   container.x = anchor.x;
   container.y = anchor.y;
   container.resize(plan.width, 200);
   container.fills = [{ fillColor: plan.bg, fillOpacity: 1 }];
   container.borderRadius = plan.radius;
 
-  // Добавляем flex layout
-  const flex = container.addFlexLayout();
-  flex.dir = 'column';
-  flex.alignItems = 'start';
-  flex.justifyContent = 'start';
-  flex.rowGap = plan.titleBodyGap;
-  flex.columnGap = 0;
-  flex.topPadding = plan.padding;
-  flex.rightPadding = plan.padding;
-  flex.bottomPadding = plan.padding;
-  flex.leftPadding = plan.padding;
+  // Добавляем тень
+  container.shadows = [{
+    style: 'drop-shadow',
+    offsetX: 0,
+    offsetY: 2,
+    blur: 8,
+    spread: 0,
+    hidden: false,
+    color: {
+      color: '#000000',
+      opacity: 0.15
+    }
+  }];
+  console.log("[Stickers] Shadow added to container");
 
-  container.verticalSizing = 'auto';
-  container.horizontalSizing = 'fix';
+  // Пробуем добавить flex layout, если метод существует
+  if (typeof container.addFlexLayout === 'function') {
+    console.log("[Stickers] addFlexLayout exists, trying to call...");
+    try {
+      const flex = container.addFlexLayout();
+      console.log("[Stickers] Flex layout added successfully!");
+
+      flex.dir = 'column';
+      flex.alignItems = 'start';
+      flex.justifyContent = 'start';
+      flex.rowGap = plan.titleBodyGap;
+      flex.columnGap = 0;
+      flex.topPadding = plan.padding;
+      flex.rightPadding = plan.padding;
+      flex.bottomPadding = plan.padding;
+      flex.leftPadding = plan.padding;
+
+      // ВАЖНО: sizing устанавливается напрямую на container, а не через flex!
+      container.verticalSizing = 'auto'; // Fit content vertical
+      container.horizontalSizing = 'fix'; // Фиксированная ширина
+      console.log("[Stickers] Container sizing set: verticalSizing=auto, horizontalSizing=fix");
+    } catch (e) {
+      console.error("[Stickers] Failed to add flex layout:", e);
+      throw e;
+    }
+  } else {
+    console.warn("[Stickers] addFlexLayout method not found!");
+  }
 
   // Создаем заголовок с autolayout контейнером
   const headerContainer = penpot.createBoard();
@@ -71,10 +104,8 @@ function insertSticker(plan) {
   headerFlex.rightPadding = 0;
   headerFlex.bottomPadding = 0;
   headerFlex.leftPadding = 0;
-
-  // Настраиваем auto height для контейнера заголовка
   headerContainer.verticalSizing = 'auto';
-  headerContainer.horizontalSizing = 'fixed';
+  headerContainer.horizontalSizing = 'fill';
 
   const titleText = penpot.createText(plan.title);
   titleText.name = "Title";
@@ -83,27 +114,25 @@ function insertSticker(plan) {
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
   titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
+
   titleText.growType = "auto-height";
 
-  // Добавляем текст в контейнер
   headerContainer.appendChild(titleText);
 
-  // Настраиваем layoutChild для текста внутри flex контейнера
   if (titleText.layoutChild) {
     titleText.layoutChild.horizontalSizing = 'fill';
     titleText.layoutChild.verticalSizing = 'auto';
   }
 
-  // Добавляем контейнер заголовка в главный контейнер
+  // Добавляем header контейнер в основной контейнер
   container.appendChild(headerContainer);
 
-  // Настраиваем layoutChild для контейнера заголовка внутри главного flex контейнера
   if (headerContainer.layoutChild) {
     headerContainer.layoutChild.horizontalSizing = 'fill';
     headerContainer.layoutChild.verticalSizing = 'auto';
   }
 
-  console.log("[Stickers] Header container added");
+  console.log("[Stickers] Header container with autolayout created");
 
   // Создаем body текст с autolayout контейнером
   if (plan.text) {
@@ -121,10 +150,8 @@ function insertSticker(plan) {
     textFlex.rightPadding = 0;
     textFlex.bottomPadding = 0;
     textFlex.leftPadding = 0;
-
-    // Настраиваем auto height для контейнера текста
     textContainer.verticalSizing = 'auto';
-    textContainer.horizontalSizing = 'fixed';
+    textContainer.horizontalSizing = 'fill';
 
     const bodyText = penpot.createText(plan.text);
     bodyText.name = "Body";
@@ -133,30 +160,28 @@ function insertSticker(plan) {
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
     bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
+
     bodyText.growType = "auto-height";
 
-    // Добавляем текст в контейнер
     textContainer.appendChild(bodyText);
 
-    // Настраиваем layoutChild для текста внутри flex контейнера
     if (bodyText.layoutChild) {
       bodyText.layoutChild.horizontalSizing = 'fill';
       bodyText.layoutChild.verticalSizing = 'auto';
     }
 
-    // Добавляем контейнер текста в главный контейнер
+    // Добавляем text контейнер в основной контейнер
     container.appendChild(textContainer);
 
-    // Настраиваем layoutChild для контейнера текста внутри главного flex контейнера
     if (textContainer.layoutChild) {
       textContainer.layoutChild.horizontalSizing = 'fill';
       textContainer.layoutChild.verticalSizing = 'auto';
     }
 
-    console.log("[Stickers] Text container added");
+    console.log("[Stickers] Text container with autolayout created");
   }
 
-  console.log("[Stickers] Sticker with nested autolayouts created successfully");
+  console.log("[Stickers] Sticker created successfully");
   return { id: container.id, x: anchor.x, y: anchor.y };
 }
 
