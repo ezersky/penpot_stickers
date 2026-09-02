@@ -10,11 +10,13 @@ function insertSticker(plan) {
   container.name = "Sticker";
   container.x = anchor.x;
   container.y = anchor.y;
+  
+  // Задаем базовый размер. Высота автоматически адаптируется.
   container.resize(plan.width, 100); 
   container.fills = [{ fillColor: plan.bg, fillOpacity: 1 }];
   container.borderRadius = plan.radius;
 
-  // Тень для главного контейнера
+  // Тень для карточки
   container.shadows = [{
     style: 'drop-shadow',
     offsetX: 0,
@@ -25,35 +27,25 @@ function insertSticker(plan) {
     color: { color: '#000000', opacity: 0.15 }
   }];
 
-  // Включаем автолейаут (Flex) для главного контейнера
+  // Настраиваем Flex Layout для главного контейнера
   const mainFlex = container.addFlexLayout();
-  mainFlex.dir = 'column';              
-  mainFlex.alignItems = 'stretch';      // Дочерние элементы растягиваются по ширине
+  mainFlex.dir = 'column';              // Элементы идут сверху вниз
+  mainFlex.alignItems = 'stretch';      // Растягиваем элементы на всю ширину
   mainFlex.justifyContent = 'start';
-  mainFlex.rowGap = plan.titleBodyGap;  
+  mainFlex.rowGap = plan.titleBodyGap;  // Динамический отступ между Title и Body
   mainFlex.columnGap = 0;
   mainFlex.topPadding = plan.padding;
   mainFlex.rightPadding = plan.padding;
   mainFlex.bottomPadding = plan.padding;
   mainFlex.leftPadding = plan.padding;
 
-  // Настройка размеров главного контейнера
-  container.horizontalSizing = 'fix';   // Фиксированная ширина карточки
-  container.verticalSizing = 'auto';    // Высота зависит от контента
+  // Управляем сайзингом главного контейнера
+  container.horizontalSizing = 'fix';   // Ширина жестко фиксирована (plan.width)
+  container.verticalSizing = 'auto';    // Высота растет сама по мере добавления текста
 
   // ========================================
-  // 2. СОЗДАЕМ HEADER И ВЛОЖЕННЫЙ ТЕКСТ
+  // 2. СОЗДАЕМ И ВЛОЖАЕМ ТЕКСТ ЗАГОЛОВКА (Title)
   // ========================================
-  const headerAutolayout = penpot.createBoard();
-  headerAutolayout.name = "Header";
-  headerAutolayout.fills = [];
-
-  const headerFlex = headerAutolayout.addFlexLayout();
-  headerFlex.dir = 'column';
-  headerFlex.alignItems = 'stretch';
-  headerFlex.justifyContent = 'start';
-
-  // Создаем текст заголовка
   const titleText = penpot.createText(plan.title);
   titleText.name = "Title";
   titleText.fontFamily = plan.fontFamily;
@@ -61,34 +53,20 @@ function insertSticker(plan) {
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
 
-  // ПОРЯДОК ВАЖЕН: Сначала вкладываем элементы друг в друга
-  headerAutolayout.appendChild(titleText);
-  container.appendChild(headerAutolayout);
+  // Сначала добавляем текстовый слой напрямую в Sticker
+  container.appendChild(titleText);
 
-  // ПОРЯДОК ВАЖЕН: Настраиваем sizing ТОЛЬКО ПОСЛЕ вложения в контейнеры
-  titleText.growType = "auto-height";
-  titleText.horizontalSizing = 'fill';
-  titleText.verticalSizing = 'auto';
+  // Настраиваем поведение текстового блока сразу после вложения
+  titleText.growType = "auto-height";   // Автоперенос строк и рост вниз
+  titleText.horizontalSizing = 'fill'; // Заполнить ширину контейнера (минус padding)
+  titleText.verticalSizing = 'auto';    // Высота зависит от контента
 
-  headerAutolayout.horizontalSizing = 'fill';
-  headerAutolayout.verticalSizing = 'auto';
-
-  console.log("[Stickers] Header attached and configured");
+  console.log("[Stickers] Title added directly to Sticker");
 
   // ========================================
-  // 3. СОЗДАЕМ TEXT И ВЛОЖЕННЫЙ ТЕКСТ
+  // 3. СОЗДАЕМ И ВЛОЖАЕМ ОСНОВНОЙ ТЕКСТ (Body)
   // ========================================
   if (plan.text) {
-    const textAutolayout = penpot.createBoard();
-    textAutolayout.name = "Text";
-    textAutolayout.fills = [];
-
-    const textFlex = textAutolayout.addFlexLayout();
-    textFlex.dir = 'column';
-    textFlex.alignItems = 'stretch';
-    textFlex.justifyContent = 'start';
-
-    // Создаем текст body
     const bodyText = penpot.createText(plan.text);
     bodyText.name = "Body";
     bodyText.fontFamily = plan.fontFamily;
@@ -96,21 +74,17 @@ function insertSticker(plan) {
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
 
-    // ПОРЯДОК ВАЖЕН: Сначала вкладываем элементы друг в друга
-    textAutolayout.appendChild(bodyText);
-    container.appendChild(textAutolayout);
+    // Добавляем слой текста напрямую в Sticker ниже заголовка
+    container.appendChild(bodyText);
 
-    // ПОРЯДОК ВАЖЕН: Настраиваем sizing ТОЛЬКО ПОСЛЕ вложения в контейнеры
-    bodyText.growType = "auto-height";
-    bodyText.horizontalSizing = 'fill';
-    bodyText.verticalSizing = 'auto';
+    // Настраиваем поведение
+    bodyText.growType = "auto-height";   // Автоперенос строк и рост вниз
+    bodyText.horizontalSizing = 'fill'; // Заполнить ширину контейнера (минус padding)
+    bodyText.verticalSizing = 'auto';    // Высота зависит от контента
 
-    textAutolayout.horizontalSizing = 'fill';
-    textAutolayout.verticalSizing = 'auto';
-
-    console.log("[Stickers] Text attached and configured");
+    console.log("[Stickers] Body added directly to Sticker");
   }
 
-  console.log("[Stickers] Sticker created successfully");
+  console.log("[Stickers] Sticker created successfully without nested layout bugs");
   return { id: container.id, x: anchor.x, y: anchor.y };
 }
