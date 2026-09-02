@@ -1,12 +1,12 @@
 /**
  * Stickers — plugin.js (sandbox context)
  *
- * v5: Тестовая версия - проверяем доступные методы для Board
+ * v5: Тестовая версия - исправлено автоматическое изменение высоты текста
  */
 
-console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-10-55");
+console.log("[Stickers] plugin.js loaded - VERSION 2026-08-31-11-20");
 
-penpot.ui.open("Stickers", "index.html", { width: 360, height: 560 });
+penpot.ui.open("Stickers", "index.html", { width: 360, height: 720 });
 
 const CASCADE_STEP = 24;
 const CASCADE_MAX = 6;
@@ -39,7 +39,7 @@ function insertSticker(plan) {
   container.name = "Sticker";
   container.x = anchor.x;
   container.y = anchor.y;
-  container.resize(plan.width, 200); // Базовый размер, изменится автоматически
+  container.resize(plan.width, 100); // Начальная высота не важна, она подстроится
   container.fills = [{ fillColor: plan.bg, fillOpacity: 1 }];
   container.borderRadius = plan.radius;
 
@@ -60,7 +60,7 @@ function insertSticker(plan) {
   // Включаем автолейаут (Flex) для главного контейнера
   const mainFlex = container.addFlexLayout();
   mainFlex.dir = 'column';              // Вертикальное расположение
-  mainFlex.alignItems = 'start';
+  mainFlex.alignItems = 'stretch';      // Растягиваем дочерние элементы по ширине (важно для fill)
   mainFlex.justifyContent = 'start';
   mainFlex.rowGap = plan.titleBodyGap;  // Отступ между Header и Text
   mainFlex.columnGap = 0;
@@ -69,8 +69,9 @@ function insertSticker(plan) {
   mainFlex.bottomPadding = plan.padding;
   mainFlex.leftPadding = plan.padding;
 
-  // ВАЖНО: sizing для автоматического изменения размера
+  // ВАЖНО: sizing для автоматического изменения размера контейнера
   container.verticalSizing = 'auto';     // Высота подстраивается под контент
+  container.horizontalSizing = 'fix';    // Ширина фиксированная (задана пользователем)
 
   console.log("[Stickers] Main container with autolayout created");
 
@@ -79,14 +80,12 @@ function insertSticker(plan) {
   // ========================================
   const headerAutolayout = penpot.createBoard();
   headerAutolayout.name = "Header";
-
-  // Убираем фон у Header (делаем прозрачным)
   headerAutolayout.fills = [];
 
   // Включаем автолейаут для Header
   const headerFlex = headerAutolayout.addFlexLayout();
   headerFlex.dir = 'column';
-  headerFlex.alignItems = 'start';
+  headerFlex.alignItems = 'stretch';
   headerFlex.justifyContent = 'start';
   headerFlex.rowGap = 0;
   headerFlex.columnGap = 0;
@@ -103,23 +102,17 @@ function insertSticker(plan) {
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
 
-  // ВАЖНО: устанавливаем growType ДО resize и appendChild
+  // Устанавливаем поведение изменения размера текста
   titleText.growType = "auto-height";
-
-  // ВАЖНО: фиксированная ширина для переноса текста
-  titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
+  titleText.horizontalSizing = 'fill'; // Заполняет всю доступную ширину родителя
+  titleText.verticalSizing = 'auto';    // Высота зависит от содержимого
 
   // Добавляем текст в Header
   headerAutolayout.appendChild(titleText);
 
-  // Настройка sizing через layoutChild (если нужно)
-  if (titleText.layoutChild) {
-    titleText.layoutChild.verticalSizing = 'auto';
-  }
-
-  // Настраиваем sizing для Header
-  headerAutolayout.verticalSizing = 'auto';   // Высота подстраивается
-  headerAutolayout.horizontalSizing = 'auto'; // Fit content (Horizontal)
+  // Настраиваем sizing для контейнера Header внутри стикера
+  headerAutolayout.horizontalSizing = 'fill'; // Растягивается на всю ширину стикера
+  headerAutolayout.verticalSizing = 'auto';   // Высота рассчитывается по тексту
 
   // Добавляем Header в главный контейнер
   container.appendChild(headerAutolayout);
@@ -132,14 +125,12 @@ function insertSticker(plan) {
   if (plan.text) {
     const textAutolayout = penpot.createBoard();
     textAutolayout.name = "Text";
-
-    // Убираем фон у Text (делаем прозрачным)
     textAutolayout.fills = [];
 
     // Включаем автолейаут для Text
     const textFlex = textAutolayout.addFlexLayout();
     textFlex.dir = 'column';
-    textFlex.alignItems = 'start';
+    textFlex.alignItems = 'stretch';
     textFlex.justifyContent = 'start';
     textFlex.rowGap = 0;
     textFlex.columnGap = 0;
@@ -156,23 +147,17 @@ function insertSticker(plan) {
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
 
-    // ВАЖНО: устанавливаем growType ДО resize и appendChild
+    // Устанавливаем поведение изменения размера текста
     bodyText.growType = "auto-height";
-
-    // ВАЖНО: фиксированная ширина для переноса текста
-    bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
+    bodyText.horizontalSizing = 'fill'; // Заполняет всю доступную ширину родителя
+    bodyText.verticalSizing = 'auto';    // Высота зависит от содержимого
 
     // Добавляем текст в Text
     textAutolayout.appendChild(bodyText);
 
-    // Настройка sizing через layoutChild (если нужно)
-    if (bodyText.layoutChild) {
-      bodyText.layoutChild.verticalSizing = 'auto';
-    }
-
-    // Настраиваем sizing для Text
-    textAutolayout.verticalSizing = 'auto';   // Высота подстраивается
-    textAutolayout.horizontalSizing = 'auto'; // Fit content (Horizontal)
+    // Настраиваем sizing для контейнера Text внутри стикера
+    textAutolayout.horizontalSizing = 'fill'; // Растягивается на всю ширину стикера
+    textAutolayout.verticalSizing = 'auto';   // Высота рассчитывается по тексту
 
     // Добавляем Text в главный контейнер
     container.appendChild(textAutolayout);
