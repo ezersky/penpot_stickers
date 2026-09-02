@@ -102,13 +102,17 @@ function insertSticker(plan) {
   titleText.fontSize = String(plan.titleFontSize);
   titleText.fontWeight = "700";
   titleText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-  titleText.growType = "auto-height"; // Текст растет по высоте
 
   // ВАЖНО: фиксированная ширина для переноса текста
   titleText.resize(plan.width - plan.padding * 2, plan.titleFontSize * 1.4);
 
   // Добавляем текст в Header
   headerAutolayout.appendChild(titleText);
+
+  // Устанавливаем Auto Height для текста через layoutChild
+  if (titleText.layoutChild) {
+    titleText.layoutChild.verticalSizing = 'auto'; // Auto height
+  }
 
   // Настраиваем sizing для Header
   headerAutolayout.verticalSizing = 'auto';   // Высота подстраивается
@@ -148,13 +152,17 @@ function insertSticker(plan) {
     bodyText.fontSize = String(plan.bodyFontSize);
     bodyText.fontWeight = "400";
     bodyText.fills = [{ fillColor: plan.textColor, fillOpacity: 1 }];
-    bodyText.growType = "auto-height"; // Текст растет по высоте
 
     // ВАЖНО: фиксированная ширина для переноса текста
     bodyText.resize(plan.width - plan.padding * 2, plan.bodyFontSize * 1.4);
 
     // Добавляем текст в Text
     textAutolayout.appendChild(bodyText);
+
+    // Устанавливаем Auto Height для текста через layoutChild
+    if (bodyText.layoutChild) {
+      bodyText.layoutChild.verticalSizing = 'auto'; // Auto height
+    }
 
     // Настраиваем sizing для Text
     textAutolayout.verticalSizing = 'auto';   // Высота подстраивается
