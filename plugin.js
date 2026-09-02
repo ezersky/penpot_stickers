@@ -71,7 +71,6 @@ function insertSticker(plan) {
 
   // ВАЖНО: sizing для автоматического изменения размера
   container.verticalSizing = 'auto';     // Высота подстраивается под контент
-  container.horizontalSizing = 'fixed';  // Фиксированная ширина
 
   console.log("[Stickers] Main container with autolayout created");
 
@@ -108,21 +107,11 @@ function insertSticker(plan) {
   // Добавляем текст в Header
   headerAutolayout.appendChild(titleText);
 
-  // Настраиваем sizing для текста внутри автолейаута
-  if (titleText.layoutChild) {
-    titleText.layoutChild.horizontalSizing = 'auto'; // Текст заполняет ширину
-  }
-
   // Настраиваем sizing для Header
   headerAutolayout.verticalSizing = 'auto';   // Высота подстраивается
-  headerAutolayout.horizontalSizing = 'auto'; // Ширина подстраивается
 
   // Добавляем Header в главный контейнер
   container.appendChild(headerAutolayout);
-
-  if (headerAutolayout.layoutChild) {
-    headerAutolayout.layoutChild.horizontalSizing = 'auto';
-  }
 
   console.log("[Stickers] Header autolayout created");
 
@@ -160,21 +149,11 @@ function insertSticker(plan) {
     // Добавляем текст в Text
     textAutolayout.appendChild(bodyText);
 
-    // Настраиваем sizing для текста внутри автолейаута
-    if (bodyText.layoutChild) {
-      bodyText.layoutChild.horizontalSizing = 'auto'; // Текст заполняет ширину
-    }
-
     // Настраиваем sizing для Text
     textAutolayout.verticalSizing = 'auto';   // Высота подстраивается
-    textAutolayout.horizontalSizing = 'auto'; // Ширина подстраивается
 
     // Добавляем Text в главный контейнер
     container.appendChild(textAutolayout);
-
-    if (textAutolayout.layoutChild) {
-      textAutolayout.layoutChild.horizontalSizing = 'auto';
-    }
 
     console.log("[Stickers] Text autolayout created");
   }
