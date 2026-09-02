@@ -70,8 +70,8 @@ function insertSticker(plan) {
   mainFlex.leftPadding = plan.padding;
 
   // ВАЖНО: sizing для автоматического изменения размера
-  container.verticalSizing = 'auto';    // Высота подстраивается под контент
-  container.horizontalSizing = 'fix';   // Фиксированная ширина
+  container.verticalSizing = 'auto';     // Высота подстраивается под контент
+  container.horizontalSizing = 'fixed';  // Фиксированная ширина
 
   console.log("[Stickers] Main container with autolayout created");
 
@@ -110,18 +110,18 @@ function insertSticker(plan) {
 
   // Настраиваем sizing для текста внутри автолейаута
   if (titleText.layoutChild) {
-    titleText.layoutChild.horizontalSizing = 'fill'; // Текст заполняет ширину
+    titleText.layoutChild.horizontalSizing = 'auto'; // Текст заполняет ширину
   }
 
   // Настраиваем sizing для Header
   headerAutolayout.verticalSizing = 'auto';   // Высота подстраивается
-  headerAutolayout.horizontalSizing = 'fill'; // Заполняет ширину родителя
+  headerAutolayout.horizontalSizing = 'auto'; // Ширина подстраивается
 
   // Добавляем Header в главный контейнер
   container.appendChild(headerAutolayout);
 
   if (headerAutolayout.layoutChild) {
-    headerAutolayout.layoutChild.horizontalSizing = 'fill';
+    headerAutolayout.layoutChild.horizontalSizing = 'auto';
   }
 
   console.log("[Stickers] Header autolayout created");
@@ -162,18 +162,18 @@ function insertSticker(plan) {
 
     // Настраиваем sizing для текста внутри автолейаута
     if (bodyText.layoutChild) {
-      bodyText.layoutChild.horizontalSizing = 'fill'; // Текст заполняет ширину
+      bodyText.layoutChild.horizontalSizing = 'auto'; // Текст заполняет ширину
     }
 
     // Настраиваем sizing для Text
     textAutolayout.verticalSizing = 'auto';   // Высота подстраивается
-    textAutolayout.horizontalSizing = 'fill'; // Заполняет ширину родителя
+    textAutolayout.horizontalSizing = 'auto'; // Ширина подстраивается
 
     // Добавляем Text в главный контейнер
     container.appendChild(textAutolayout);
 
     if (textAutolayout.layoutChild) {
-      textAutolayout.layoutChild.horizontalSizing = 'fill';
+      textAutolayout.layoutChild.horizontalSizing = 'auto';
     }
 
     console.log("[Stickers] Text autolayout created");
