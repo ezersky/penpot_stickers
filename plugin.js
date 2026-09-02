@@ -80,6 +80,9 @@ function insertSticker(plan) {
   const headerAutolayout = penpot.createBoard();
   headerAutolayout.name = "Header";
 
+  // Убираем фон у Header (делаем прозрачным)
+  headerAutolayout.fills = [];
+
   // Включаем автолейаут для Header
   const headerFlex = headerAutolayout.addFlexLayout();
   headerFlex.dir = 'column';
@@ -109,6 +112,7 @@ function insertSticker(plan) {
 
   // Настраиваем sizing для Header
   headerAutolayout.verticalSizing = 'auto';   // Высота подстраивается
+  headerAutolayout.horizontalSizing = 'auto'; // Fit content (Horizontal)
 
   // Добавляем Header в главный контейнер
   container.appendChild(headerAutolayout);
@@ -121,6 +125,9 @@ function insertSticker(plan) {
   if (plan.text) {
     const textAutolayout = penpot.createBoard();
     textAutolayout.name = "Text";
+
+    // Убираем фон у Text (делаем прозрачным)
+    textAutolayout.fills = [];
 
     // Включаем автолейаут для Text
     const textFlex = textAutolayout.addFlexLayout();
@@ -151,6 +158,7 @@ function insertSticker(plan) {
 
     // Настраиваем sizing для Text
     textAutolayout.verticalSizing = 'auto';   // Высота подстраивается
+    textAutolayout.horizontalSizing = 'auto'; // Fit content (Horizontal)
 
     // Добавляем Text в главный контейнер
     container.appendChild(textAutolayout);
