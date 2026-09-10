@@ -1,19 +1,27 @@
 /**
  * Stickers — plugin.js (sandbox context)
  *
- * v5: упростили обратно — Header и Text лежат НАПРЯМУЮ внутри доски-стикера (без
- * отдельных досок-обёрток на каждый текст), с growType: 'auto-height'. Ширину текстам
- * отдельно не задаём вообще: flex.alignItems = 'stretch' на колонке растягивает детей на
- * всю ширину доски сам — это заодно обходит стороной ловушку text.width (свойство только
- * для чтения, прямое присваивание кидает TypeError в реальном Penpot: "Cannot set
- * property width ... which has only a getter"; единственный рабочий способ — .resize(),
- * но здесь он вообще не нужен).
+ * v6: два фикса по итогам реального теста.
  *
- * ВАЖНО про autolayout: официально подтверждённый баг Penpot (issue #8520, март 2026,
- * severity: High) — `flex.verticalSizing = 'auto'` может тихо не обнимать высоту контента
- * доски. Выставляем его на будущее (вдруг починят), но не полагаемся: высота доски-стикера
- * дополнительно фиксируется явным resize() под заранее посчитанное значение (ui.js,
- * buildStickerPlan) — это гарантированный воркэраунд, предложенный самими авторами issue.
+ * 1) verticalSizing: 'fit-content', а не 'auto'. По подтверждённому интерфейсу Penpot
+ *    FlexLayout принимает три значения — "fill" | "auto" | "fit-content". Похоже, именно
+ *    "fit-content" — та опция, что в UI Penpot подписана как "Fit content" и реально
+ *    заставляет доску обнимать высоту контента; "auto", которое использовалось раньше,
+ *    было попросту неверным значением с моей стороны (не то же самое, что баг #8520).
+ *
+ * 2) Header/Text схлопывались до 1px. growType: 'auto-height' означает "ширина
+ *    фиксирована, высота растёт под контент" — а не "оба измерения сами по себе".
+ *    alignItems:'stretch' одного факта растягивания на всю ширину доски не гарантирует
+ *    для текстовых фигур. Явно фиксируем стартовую ширину текста через .resize(w, h) —
+ *    .width напрямую присвоить нельзя (см. v5: TypeError, свойство только для чтения),
+ *    но .resize() работает, это тот же метод, что и у Rectangle/Board. Высоту передаём
+ *    из оценки ui.js (buildStickerPlan.titleHeight/bodyHeight) — дальше growType:
+ *    'auto-height' сам подправит высоту под реальный рендер текста.
+ *
+ * Высота внешней доски-стикера всё ещё дополнительно подстрахована явным resize() —
+ * доска с несколькими разнородными детьми (Header + Text) это тот случай, где
+ * issue #8520 (https://github.com/penpot/penpot/issues/8520) воспроизводится надёжнее
+ * всего, даже если verticalSizing теперь правильный.
  */
 
 console.log("[Stickers] plugin.js loaded");
@@ -39,12 +47,14 @@ function nextAnchor(width, height) {
   return { x: base.x + cascadeIndex * CASCADE_STEP, y: base.y + cascadeIndex * CASCADE_STEP };
 }
 
-function createStickerText(content, fontFamily, fontSize, fontWeight, textColor) {
+function createStickerText(content, fontFamily, fontSize, fontWeight, textColor, width, height) {
   const text = penpot.createText(content);
   text.fontFamily = fontFamily;
   text.fontSize = String(fontSize);
   text.fontWeight = String(fontWeight);
   text.fills = [{ fillColor: textColor, fillOpacity: 1 }];
+  // Стартовый размер — ОБЯЗАТЕЛЬНО через resize(), не через .width (только для чтения).
+  text.resize(width, height);
   text.growType = "auto-height";
   return text;
 }
@@ -78,22 +88,28 @@ function insertSticker(plan) {
   flex.rightPadding = plan.padding;
   flex.bottomPadding = plan.padding;
   flex.leftPadding = plan.padding;
-  flex.alignItems = "stretch"; // растягивает Header/Text на всю ширину доски — ширину текста отдельно не задаём
+  flex.alignItems = "stretch";
   flex.justifyContent = "start";
-  flex.verticalSizing = "auto"; // на будущее, если Penpot починит issue #8520
+  flex.verticalSizing = "fit-content"; // "Fit content (Vertical)" — доска обнимает высоту контента
 
-  const titleText = createStickerText(plan.title, plan.fontFamily, plan.titleFontSize, "700", plan.textColor);
+  const titleText = createStickerText(
+    plan.title, plan.fontFamily, plan.titleFontSize, "700", plan.textColor,
+    plan.textWidth, plan.titleHeight
+  );
   titleText.name = "Header";
   board.appendChild(titleText);
 
   if (plan.text) {
-    const bodyText = createStickerText(plan.text, plan.fontFamily, plan.bodyFontSize, "400", plan.textColor);
+    const bodyText = createStickerText(
+      plan.text, plan.fontFamily, plan.bodyFontSize, "400", plan.textColor,
+      plan.textWidth, plan.bodyHeight
+    );
     bodyText.name = "Text";
     board.appendChild(bodyText);
   }
 
-  // Страховка: несколько разнородных детей — ровно тот случай, где issue #8520
-  // воспроизводится надёжнее всего, поэтому явно фиксируем высоту доски.
+  // Страховка: несколько разнородных детей — тот случай, где issue #8520 воспроизводится
+  // надёжнее всего, поэтому дополнительно явно фиксируем высоту доски.
   board.resize(plan.width, plan.height);
 
   board.name = plan.title ? `Sticker — ${plan.title}` : "Sticker";
