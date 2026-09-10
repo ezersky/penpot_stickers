@@ -76,7 +76,11 @@ function computeCardHeight(title, text) {
   const contentHeight =
     STICKER_PADDING + titleBlockHeight + (text ? TITLE_BODY_GAP + bodyBlockHeight : 0) + STICKER_PADDING;
 
-  return Math.max(STICKER_MIN_HEIGHT, contentHeight);
+  return {
+    height: Math.max(STICKER_MIN_HEIGHT, contentHeight),
+    titleHeight: titleBlockHeight,
+    bodyHeight: bodyBlockHeight,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -89,7 +93,8 @@ function buildStickerPlan(options) {
   const color = colorById(opts.color);
   const title = (opts.title || "Sticker").trim() || "Sticker";
   const text = (opts.text || "").trim();
-  const height = computeCardHeight(title, text);
+  const sizes = computeCardHeight(title, text);
+  const textWidth = STICKER_WIDTH - STICKER_PADDING * 2;
 
   return {
     color: color.id,
@@ -98,7 +103,10 @@ function buildStickerPlan(options) {
     title,
     text,
     width: STICKER_WIDTH,
-    height,
+    height: sizes.height,
+    textWidth,
+    titleHeight: Math.max(sizes.titleHeight, TITLE_LINE_HEIGHT),
+    bodyHeight: Math.max(sizes.bodyHeight, BODY_LINE_HEIGHT),
     radius: STICKER_RADIUS,
     padding: STICKER_PADDING,
     titleFontSize: TITLE_FONT_SIZE,
