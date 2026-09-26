@@ -82,10 +82,8 @@ function insertSticker(plan) {
   ];
 
   // --- Вычисляем итоговую высоту вручную ---
-  // Формула: padding (сверху) + высота заголовка + gap + высота текста + padding (снизу)
   const totalPadding = plan.padding * 2;
   const titleBlockHeight = plan.titleHeight;
-  // Если текста нет, gap не учитываем
   const bodyBlockHeight = plan.text ? (plan.titleBodyGap + plan.bodyHeight) : 0;
   const calculatedHeight = totalPadding + titleBlockHeight + bodyBlockHeight;
 
@@ -101,6 +99,9 @@ function insertSticker(plan) {
   flex.leftPadding = plan.padding;
   flex.alignItems = "stretch";
   flex.justifyContent = "start";
+  
+  // НЕ устанавливаем verticalSizing вообще — полагаемся на ручной resize выше
+  flex.verticalSizing = "fix"; // Доска сохраняет фиксированную высоту, которую вы задали через resize()
 
   const titleText = createStickerText(
     plan.title, plan.fontFamily, plan.titleFontSize, "700", plan.textColor,
