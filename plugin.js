@@ -101,8 +101,6 @@ function insertSticker(plan) {
   flex.leftPadding = plan.padding;
   flex.alignItems = "stretch";
   flex.justifyContent = "start";
-  // Оставляем "auto" — оно не сломает код, но и не поможет. Полагаемся на расчёт.
-  flex.verticalSizing = "auto";
 
   const titleText = createStickerText(
     plan.title, plan.fontFamily, plan.titleFontSize, "700", plan.textColor,
