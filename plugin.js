@@ -101,7 +101,7 @@ function insertSticker(plan) {
   flex.justifyContent = "start";
   
   // НЕ устанавливаем verticalSizing вообще — полагаемся на ручной resize выше
-  flex.verticalSizing = "fix"; // Доска сохраняет фиксированную высоту, которую вы задали через resize()
+  flex.verticalSizing = "auto"; // Доска сохраняет фиксированную высоту, которую вы задали через resize()
 
   const titleText = createStickerText(
     plan.title, plan.fontFamily, plan.titleFontSize, "700", plan.textColor,
