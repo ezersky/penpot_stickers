@@ -81,6 +81,17 @@ function insertSticker(plan) {
     },
   ];
 
+  // --- Вычисляем итоговую высоту вручную ---
+  // Формула: padding (сверху) + высота заголовка + gap + высота текста + padding (снизу)
+  const totalPadding = plan.padding * 2;
+  const titleBlockHeight = plan.titleHeight;
+  // Если текста нет, gap не учитываем
+  const bodyBlockHeight = plan.text ? (plan.titleBodyGap + plan.bodyHeight) : 0;
+  const calculatedHeight = totalPadding + titleBlockHeight + bodyBlockHeight;
+
+  // Сначала задаём размеры доски с рассчитанной высотой
+  board.resize(plan.width, calculatedHeight);
+
   const flex = board.addFlexLayout();
   flex.dir = "column";
   flex.rowGap = plan.titleBodyGap;
@@ -90,7 +101,8 @@ function insertSticker(plan) {
   flex.leftPadding = plan.padding;
   flex.alignItems = "stretch";
   flex.justifyContent = "start";
-  flex.verticalSizing = "fit-content"; // "Fit content (Vertical)" — доска обнимает высоту контента
+  // Оставляем "auto" — оно не сломает код, но и не поможет. Полагаемся на расчёт.
+  flex.verticalSizing = "auto";
 
   const titleText = createStickerText(
     plan.title, plan.fontFamily, plan.titleFontSize, "700", plan.textColor,
@@ -107,10 +119,6 @@ function insertSticker(plan) {
     bodyText.name = "Text";
     board.appendChild(bodyText);
   }
-
-  // Страховка: несколько разнородных детей — тот случай, где issue #8520 воспроизводится
-  // надёжнее всего, поэтому дополнительно явно фиксируем высоту доски.
-  board.resize(plan.width, plan.height);
 
   board.name = plan.title ? `Sticker — ${plan.title}` : "Sticker";
 
